@@ -1,3 +1,5 @@
 from django.contrib import admin
+from apps.meetings.models import Meeting
 
-# Register your models here.
+
+admin.site.register(Meeting)
