@@ -12,12 +12,12 @@ class MemberMeetingRelation(models.Model):
     member_type = models.CharField(max_length=5, choices=MEMBER_TYPE_CHOICES, null=False)
 
     class Meta:
-        unique_together = [['meeting', 'member'],]
+        unique_together = [['meeting', 'member'], ]
 
 
 class Meeting(models.Model):
 
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=30, default='Untitled')
     host = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='+')
     members = models.ManyToManyField('users.User', related_name='meetings', through='meetings.MemberMeetingRelation')
 
