@@ -26,8 +26,8 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
             'unique': _("A user with that username already exists."),
         },
     )
-    name = models.CharField(_('name'), max_length=30, blank=True)
-    email = models.EmailField(_('email address'), blank=True)
+    name = models.CharField(_('name'), max_length=30, blank=False)
+    email = models.EmailField(_('email address'), blank=False)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
