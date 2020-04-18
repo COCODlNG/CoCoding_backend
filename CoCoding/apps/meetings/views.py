@@ -1,8 +1,9 @@
-from rest_framework import mixins
+from rest_framework import mixins, viewsets
 from rest_framework.viewsets import GenericViewSet
 
-from .models import Meeting
-from .serializers import MeetingDetailSerializer
+from apps.meetings.models import Meeting
+from apps.users.models import User
+from apps.meetings.serializers import MeetingDetailSerializer, MeetingMemberRelationSerializer
 
 
 class MeetingViewSet(mixins.CreateModelMixin,
@@ -16,3 +17,13 @@ class MeetingViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         return self.request.user.meetings.all()
+
+
+class MeetingMemberViewSet(mixins.CreateModelMixin,
+                           mixins.UpdateModelMixin,
+                           mixins.DestroyModelMixin,
+                           mixins.ListModelMixin,
+                           GenericViewSet):
+
+    serializer_class = MeetingMemberRelationSerializer
+    queryset = User.objects.all().order_by('id')
