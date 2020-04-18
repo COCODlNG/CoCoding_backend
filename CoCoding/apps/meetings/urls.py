@@ -1,9 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from apps.meetings import views
+from apps.meetings.views import MeetingMemberViewSet, MeetingViewSet
 
 router = DefaultRouter(trailing_slash=False)
-router.register('meetings', views.MeetingViewSet)
+router.register('meetings', MeetingViewSet)
+router.register('meetings/create', MeetingMemberViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
