@@ -1,9 +1,9 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
 from apps.meetings.models import Meeting
-from apps.users.models import User
 from apps.meetings.serializers import MeetingDetailSerializer, MeetingMemberRelationSerializer
+from apps.users.models import User
 
 
 class MeetingViewSet(mixins.CreateModelMixin,
