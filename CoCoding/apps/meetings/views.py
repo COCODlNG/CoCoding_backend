@@ -3,7 +3,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from apps.meetings.models import Meeting
 from apps.meetings.serializers import MeetingDetailSerializer, MeetingMemberRelationSerializer
-from apps.users.models import User
+from apps.meetings.models import MeetingMemberRelation
 
 
 class MeetingViewSet(mixins.CreateModelMixin,
@@ -26,4 +26,11 @@ class MeetingMemberViewSet(mixins.CreateModelMixin,
                            GenericViewSet):
 
     serializer_class = MeetingMemberRelationSerializer
-    queryset = User.objects.all().order_by('id')
+    queryset = MeetingMemberRelation.objects.all()
+
+    def get_queryset(self):
+        queryset = super(MeetingMemberViewSet, self).get_queryset()
+        meeting_pk = self.kwargs.get('meeting_pk')
+        if meeting_pk:
+            queryset.filter(meeting=meeting_pk)
+        return queryset
