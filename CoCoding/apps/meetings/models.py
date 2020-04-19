@@ -16,7 +16,6 @@ class MeetingMemberRelation(models.Model):
 
 
 class Meeting(models.Model):
-
     title = models.CharField(max_length=30, default='Untitled')
     host = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='+')
     members = models.ManyToManyField('users.User', related_name='meetings', through='meetings.MeetingMemberRelation')
