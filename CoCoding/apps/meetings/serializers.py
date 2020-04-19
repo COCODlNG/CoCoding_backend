@@ -3,18 +3,11 @@ from .models import Meeting, MeetingMemberRelation
 from apps.users.serializers import UserSerializer
 
 
-class MeetingListSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Meeting
-        fields = ['title', 'host', ]
-
-
 class MeetingDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meeting
-        fields = ['title', 'host', 'members', ]
+        fields = ['title', 'host', ]
 
 
 class MeetingMemberRelationSerializer(serializers.ModelSerializer):
