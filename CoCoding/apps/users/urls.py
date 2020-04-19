@@ -8,5 +8,5 @@ router.register(r'', UserViewSet)
 
 urlpatterns = [
     path('login/', LoginView.as_view()),
-    path('meetings/', include(router.urls)),
+    path('', include(router.urls)),
 ]
