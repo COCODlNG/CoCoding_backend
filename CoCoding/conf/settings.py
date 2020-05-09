@@ -47,6 +47,7 @@ CUSTOM_APPS = [
     'apps.users',
     'apps.meetings',
     'apps.codes',
+    'apps.sockets',
 ]
 
 INSTALLED_APPS += CUSTOM_APPS
@@ -144,3 +145,11 @@ REST_FRAMEWORK = {
 
 # Django Channels
 ASGI_APPLICATION = 'conf.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
