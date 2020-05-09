@@ -1,12 +1,7 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-
-from apps.users.views import LoginView, UserViewSet
-
-router = DefaultRouter()
-router.register(r'', UserViewSet)
+from django.urls import path
+from .views import LoginView, LogoutView
 
 urlpatterns = [
-    path('login/', LoginView.as_view()),
-    path('', include(router.urls)),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]

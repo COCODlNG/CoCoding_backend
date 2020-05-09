@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <a class="btn btn-primary" href="{% url 'meeting:create' %}">미팅 만들기</a>
+    <div>
+        {% for meeting in object_list %}
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ meeting.title }}</h5>
+                    <p class="card-text">{{ meeting.host }}</p>
+                    {% if meeting.host == user %}
+                        <a href="{{ meeting.get_update_url }}" class="btn btn-primary">미팅 관리</a>
+                        <a href="{{ meeting.get_start_url }}" class="btn btn-primary">미팅 시작</a>
+                    {% else %}
+                        {% if meeting.is_ongoing %}
+                            <a href="{{ meeting.get_detail_url }}" class="btn btn-primary">미팅 참가</a>
+                        {% else %}
+                            <a href="" class="btn btn-primary disabled">미팅 참가</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <h1>미팅이 없습니다.</h1>
+        {% endfor %}
+    </div>
+{% endblock %}
