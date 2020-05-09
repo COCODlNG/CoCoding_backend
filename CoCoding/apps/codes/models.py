@@ -1,9 +1,10 @@
 from django.db import models
 
 # Create your models here.
+from core.models import TimeStampedModel
 
 
-class Code(models.Model):
+class Code(TimeStampedModel):
     QUEUED, ONGOING, COMPLETED, FAILED = 0, 10, 20, 30
     STATUS_CHOICES = (
         (QUEUED, '대기중'),
