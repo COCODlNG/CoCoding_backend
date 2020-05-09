@@ -1,27 +1,22 @@
-from rest_framework import mixins
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
-
-from apps.users.models import User
-from apps.users.serializers import UserSerializer
+from django.contrib.auth import logout
+from django.contrib.auth.views import LoginView as BaseLoginView
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from django.views.generic import RedirectView
 
 
-class LoginView(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        # todo: 로그인시에 띄워줄 기본정보 필요시에 이 부분 오버라이딩
-        return Response({'token': token.key})
+class LoginView(BaseLoginView):
+    template_name = 'login.html'
+
+    def get_redirect_url(self):
+        return reverse_lazy('meeting:list')
 
 
-class UserViewSet(mixins.RetrieveModelMixin,
-                  mixins.CreateModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.ListModelMixin,
-                  GenericViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class LogoutView(RedirectView):
+    url = reverse_lazy('index')
+
+    @method_decorator(never_cache)
+    def dispatch(self, request, *args, **kwargs):
+        logout(request)
+        return super(LogoutView, self).dispatch(request, *args, **kwargs)
