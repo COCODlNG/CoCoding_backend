@@ -1,9 +1,9 @@
 from django.db import models
 
-from core.models import TimeStampedModel
+from core.models import TimeStampedMixin
 
 
-class MeetingMemberRelation(TimeStampedModel):
+class MeetingMemberRelation(TimeStampedMixin, models.Model):
     meeting = models.ForeignKey('meetings.Meeting', on_delete=models.CASCADE)
     member = models.ForeignKey('users.User', on_delete=models.CASCADE)
     MEMBER_MANAGER, MEMBER_STUDENT = 'manager', 'student'
@@ -17,7 +17,7 @@ class MeetingMemberRelation(TimeStampedModel):
         unique_together = [['meeting', 'member'], ]
 
 
-class Meeting(TimeStampedModel):
+class Meeting(TimeStampedMixin, models.Model):
     title = models.CharField(max_length=30, default='Untitled')
     host = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='+')
     members = models.ManyToManyField('users.User', related_name='meetings', through='meetings.MeetingMemberRelation')
