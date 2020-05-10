@@ -1,12 +1,14 @@
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import ListView, UpdateView, RedirectView, DetailView
+from django.views.generic import ListView, UpdateView, RedirectView, DetailView, View
 
 from apps.meetings.forms import MeetingForm
 from apps.meetings.models import Meeting, MeetingMemberRelation
 from core.views import CheckUserMixin
+
+from apps.users.models import User
 
 
 class MeetingListView(CheckUserMixin, ListView):
@@ -64,3 +66,28 @@ class MeetingStartView(CheckUserMixin, RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         return reverse_lazy('meeting:detail', kwargs={'pk': self.meeting.id})
+
+
+class MeetingMemberUpdateView(View):
+
+    pk_url_kwarg = 'pk'
+    meeting = None
+    user = None
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('member')
+
+        self.user = get_object_or_404(User, username=username)
+        self.meeting = get_object_or_404(Meeting, pk=kwargs['pk'])
+        try:
+            MeetingMemberRelation.objects.create(meeting=self.meeting, member=self.user)
+        except Exception:
+            context = {
+                'message': 'unique',
+                'error': '이미 추가한 아이디입니다.',
+            }
+            return JsonResponse(context, json_dumps_params={'ensure_ascii': True})
+        return HttpResponse(status=200)
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
