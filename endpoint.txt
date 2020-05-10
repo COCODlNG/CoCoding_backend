@@ -1,0 +1,14 @@
+HTTP POST /users/login	로그인처리를 담당하는 API입니다.
+HTTP GET /users		CoCoding 유저들의 리스트를 보여주는 API입니다.
+HTTP POST /users	회원가입의 기능을 지원하는 API입니다.
+HTTP GET /users/pk	유저들의 디테일한 정보를 보여주는 API입니다. 
+HTTP PATCH /users/pk	회원정보수정을 지원하는 API입니다.
+HTTP GET /meetings	회원의 속한 수업들의 리스트를 보여주는 API입니다.
+HTTP POST /meetings	미팅을 만들어주는 기능을 지원하는 API입니다.
+HTTP GET /meetings/pk	화상채팅이 이루어지는 부분을 보여주는  API입니다.
+HTTP PATCH /meetings/pk	미팅을 수정하는 기능을 지원하는 API입니다.
+HTTP GET /meetings/pk/members/ 미팅에 멤버를 보여주는 API입니다.
+HTTP POST /meetings/pk/members/ 미팅에 멤버를 추가하는 API입니다.
+HTTP POST /meetings/members/pk/delete/ 미팅에 속한 멤버를 삭제하는 API입니다.
+HTTP POST /codes/	코드를 DB에 저장하는 API입니다. 워커서버에서 다시쿼리를 날려 활용할예정입니다
+HTTP GET /codes/pk	코드 컴파일상태에대한 status를 check하는 API입니다.
