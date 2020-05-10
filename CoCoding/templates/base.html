@@ -30,6 +30,7 @@
                     <a class="btn btn-primary" href="{% url 'user:logout' %}">로그아웃</a>
                 {% else %}
                     <a class="btn btn-primary" href="{% url 'user:login' %}">로그인</a>
+                    <a class="btn btn-primary" href="{% url 'user:signup' %}">회원가입</a>
                 {% endif %}
             </form>
         </div>
