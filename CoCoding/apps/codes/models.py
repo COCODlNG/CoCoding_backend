@@ -4,7 +4,6 @@ from django.db import models
 from django_extensions.db.models import TimeStampedModel
 
 
-
 class Code(TimeStampedModel):
     QUEUED, ONGOING, COMPLETED, FAILED = 0, 10, 20, 30
     STATUS_CHOICES = (
