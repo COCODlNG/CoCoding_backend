@@ -6,9 +6,10 @@ from django.views.generic import ListView, UpdateView, RedirectView, DetailView
 
 from apps.meetings.forms import MeetingForm
 from apps.meetings.models import Meeting, MeetingMemberRelation
+from core.views import CheckUserMixin
 
 
-class MeetingListView(ListView):
+class MeetingListView(CheckUserMixin, ListView):
     model = Meeting
     template_name = 'meeting_list.html'
 
@@ -16,7 +17,7 @@ class MeetingListView(ListView):
         return self.request.user.meetings.all()
 
 
-class MeetingUpdateView(UpdateView):
+class MeetingUpdateView(CheckUserMixin, UpdateView):
     model = Meeting
     template_name = 'meeting_form.html'
     form_class = MeetingForm
@@ -24,7 +25,7 @@ class MeetingUpdateView(UpdateView):
     success_url = reverse_lazy('meeting:list')
 
 
-class MeetingCreateView(RedirectView):
+class MeetingCreateView(CheckUserMixin, RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         meeting = Meeting(host=self.request.user)
@@ -32,7 +33,7 @@ class MeetingCreateView(RedirectView):
         return reverse_lazy('meeting:update', kwargs={'pk': meeting.pk})
 
 
-class MeetingDetailView(DetailView):
+class MeetingDetailView(CheckUserMixin, DetailView):
     model = Meeting
     template_name = 'meeting_detail.html'
 
@@ -46,7 +47,7 @@ class MeetingDetailView(DetailView):
         return self.render_to_response(context)
 
 
-class MeetingStartView(RedirectView):
+class MeetingStartView(CheckUserMixin, RedirectView):
     meeting = None
 
     def setup(self, request, *args, **kwargs):

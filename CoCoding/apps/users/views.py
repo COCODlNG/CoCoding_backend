@@ -5,6 +5,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import RedirectView
 
+from core.views import CheckUserMixin
+
 
 class LoginView(BaseLoginView):
     template_name = 'login.html'
@@ -13,7 +15,7 @@ class LoginView(BaseLoginView):
         return reverse_lazy('meeting:list')
 
 
-class LogoutView(RedirectView):
+class LogoutView(CheckUserMixin, RedirectView):
     url = reverse_lazy('index')
 
     @method_decorator(never_cache)
