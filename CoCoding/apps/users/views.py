@@ -3,7 +3,9 @@ from django.contrib.auth.views import LoginView as BaseLoginView
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, CreateView
+
+from .forms import UserCreationForm
 
 
 class LoginView(BaseLoginView):
@@ -20,3 +22,9 @@ class LogoutView(RedirectView):
     def dispatch(self, request, *args, **kwargs):
         logout(request)
         return super(LogoutView, self).dispatch(request, *args, **kwargs)
+
+
+class UserRegisterView(CreateView):
+    template_name = 'register.html'
+    form_class = UserCreationForm
+    success_url = reverse_lazy('index')
