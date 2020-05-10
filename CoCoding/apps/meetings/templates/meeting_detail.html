@@ -23,7 +23,7 @@
         }
         .std-text:focus{
             padding: 0 15px 0 15px !important;
-            color: #afb1b3;
+            color: #afb1b3 !important;
             border: none !important;
             outline: none !important;
         }
@@ -83,17 +83,16 @@
         <div id="rightPane">
             <div id="topPane">
                 <textarea id="code-editor">
-def foo():
-    return 0
+print('hello python!!')
                 </textarea>
             </div>
             <div id="bottomPane">
                 <ul class="nav mb-3" role="tablist" style="margin-bottom: 0; padding-top: 10px">
                     <li class="nav-item">
-                        <button class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
+                        <button id="runBtn" class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
                     </li>
                     <li class="nav-item">
-                        <button class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
+                        <button id="stopBtn" class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active ide-font" id="input-tab" data-toggle="pill" href="#input-area" role="tab" aria-controls="input-area" aria-selected="true">Input</a>
@@ -102,22 +101,22 @@ def foo():
                         <a class="nav-link ide-font" id="output-tab" data-toggle="pill" href="#output-area" role="tab" aria-controls="output-area" aria-selected="false">Output</a>
                     </li>
                     <li class="nav-item dropdown float-right">
-                        <a class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
+                        <a id="languageDropdown" class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Python</a>
-                            <a class="dropdown-item" href="#">Java</a>
-                            <a class="dropdown-item" href="#">C</a>
+                            <a class="dropdown-item set-lang" name="Python" href="#">Python</a>
+                            <a class="dropdown-item set-lang" name="Java" href="#">Java</a>
+                            <a class="dropdown-item set-lang" name="C" href="#">C</a>
                         </div>
                     </li>
                 </ul>
                 <div class="tab-content" style="height: 100%">
                     <div class="tab-pane fade show active" id="input-area" role="tabpanel" aria-labelledby="input-tab" style="height: 100%">
-                        <textarea class="std-text">
+                        <textarea class="std-text" id="stdIn">
 
                         </textarea>
                     </div>
                     <div class="tab-pane fade" id="output-area" role="tabpanel" aria-labelledby="output-tab" style="height: 100%">
-                        <textarea class="std-text" readonly>
+                        <textarea class="std-text" readonly id="stdOut">
 
                         </textarea>
                     </div>
@@ -130,16 +129,81 @@ def foo():
 
 
 {% block extra_js %}
+    {% csrf_token %}
     <script src="{% static 'codemirror/codemirror.js' %}"></script>
     <script src="{% static 'codemirror/clike.js' %}"></script>
     <script src="{% static 'codemirror/python.js' %}"></script>
     <script src="{% static 'splitter/jquery.splitter.js' %}"></script>
     <script>
         language = 'Python';
-        function setLanguage(){
+        chatSocket = null;
+        function setLanguage(lan, flag){
+            language = lan;
+            $('#languageDropdown').html(lan);
+            var template = '';
+            if(lan === 'Python'){
+                template = `print('hello python!!')`;
+                editor.setOption('mode', 'python');
+            } else if (lan === 'Java') {
+                template = `public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello java!!");
+    }
+}
+                `;
+                editor.setOption('mode', 'text/x-java');
+            } else {
+                template = `#include<stdio.h>
 
+void main(){
+    printf("hello C!!");
+}
+                `;
+                editor.setOption('mode', 'text/x-csrc');
+            }
+            if(!flag){
+                chatSocket.send(JSON.stringify({
+                    'message': lan
+                }));
+            }
+
+            editor.getDoc().setValue(template);
         }
         $( document ).ready(function() {
+            $('#runBtn').click(function () {
+
+                $.ajax({
+                    url: "{% url 'code:run' %}",
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        language: language,
+                        code: editor.getDoc().getValue(),
+                        std_in: $('.std-text').val()
+                    },
+                    success: function (data) {
+                        alert('실행완료 되었습니다.');
+                        if(data.is_error === "True"){
+                            $('#stdOut').val(data.err_out);
+                        } else{
+                            $('#stdOut').val(data.std_out || data.err_out);
+                        }
+                        $('#output-tab').click();
+                    },
+                    error: function (data) {
+                        alert('에러가 발생했습니다.');
+                    }
+                });
+            });
+            $('#stopBtn').click(function () {
+
+            });
+
+            // =========================================================================================================
+            $('.set-lang').click(function (e) {
+                setLanguage(e.target.innerHTML);
+            })
+            // =========================================================================================================
             $("#workspace").splitter({
                 "orientation": "horizontal",
                 "limit": 10
@@ -153,7 +217,7 @@ def foo():
                 "limit": 100
             });
             // =========================================================================================================
-            const chatSocket = new WebSocket(
+            chatSocket = new WebSocket(
                 'ws://'
                 + window.location.host
                 + '/ws/chat/'
@@ -165,8 +229,12 @@ def foo():
                 const data = JSON.parse(e.data);
                 const doc = editor.getDoc();
                 var pos = editor.getDoc().getCursor();
-                doc.setValue(data.message);
-                doc.setCursor(pos);
+                if(data.lang){
+                    setLanguage(data.lang, true)
+                } else {
+                    doc.setValue(data.message);
+                    doc.setCursor(pos);
+                }
             };
 
             chatSocket.onclose = function(e) {

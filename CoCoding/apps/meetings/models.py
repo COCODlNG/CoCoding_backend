@@ -19,7 +19,7 @@ class MeetingMemberRelation(TimeStampedModel):
 
 class Meeting(TimeStampedModel):
     title = models.CharField(max_length=30, default='Untitled')
-    description = models.TextField()
+    description = models.TextField(default='')
     host = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='+')
     members = models.ManyToManyField('users.User', related_name='meetings', through='meetings.MeetingMemberRelation')
     is_ongoing = models.BooleanField(default=False)

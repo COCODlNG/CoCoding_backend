@@ -1,7 +1,10 @@
+import os
+import pathlib
 import subprocess
 import conf.settings
 from celery import Celery
 from apps.codes.models import Code
+import shutil
 
 app = Celery('run_code')
 
@@ -70,9 +73,16 @@ class CodeExecutor:
 
 
 def execute_code(code, language_type, pk):
-    C, JAVA, PYTHON = 0, 1, 2
     code_dir = conf.settings.BASE_DIR + '/tasks/task_code/'
-    if language_type == PYTHON:
+
+    try:
+        pathlib.Path(code_dir).mkdir(exist_ok=True)
+        shutil.rmtree(code_dir)
+        pathlib.Path(code_dir).mkdir(exist_ok=True)
+    except Exception:
+        pass
+
+    if language_type == Code.PYTHON:
         file_name = pk + '.py'
         full_path = code_dir + file_name
         f = open(full_path, 'w')
@@ -81,8 +91,8 @@ def execute_code(code, language_type, pk):
         proc = subprocess.Popen(['python', full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = proc.communicate()
         return out.decode('utf-8'), err.decode('utf-8')
-    elif language_type == JAVA:
-        file_name = pk + '.java'
+    elif language_type == Code.JAVA:
+        file_name = 'Main.java'
         full_path = code_dir + file_name
         f = open(full_path, 'w')
         f.write(code)
@@ -92,10 +102,10 @@ def execute_code(code, language_type, pk):
         out, err = proc.communicate()
         #out.decode('utf-8')
         #err.decode('utf-8')
-        proc = subprocess.Popen(['java', '-classpath', code_dir, pk], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(['java', '-classpath', code_dir, 'Main'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = proc.communicate()
         return out.decode('utf-8'), err.decode('utf-8')
-    elif language_type == C:
+    elif language_type == Code.C:
         file_name = pk + '.c'
         full_path = code_dir + file_name
         execute_file_name = code_dir + pk
@@ -114,6 +124,7 @@ def execute_code(code, language_type, pk):
         return out.decode('utf-8'), err.decode('utf-8')
     else:
         return None, None
+
 
 if __name__ == '__main__':
     pass
