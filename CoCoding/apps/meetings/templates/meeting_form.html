@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-
-{% block content %}
+{% block subtitle %}미팅 폼{% endblock %}
+{% block content_container %}
     <form action="." method="post">
         {% csrf_token %}
         {{ form.as_p }}

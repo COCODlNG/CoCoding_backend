@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-
-{% block content %}
+{% block subtitle %}미팅 리스트{% endblock %}
+{% block content_container %}
     <a class="btn btn-primary" href="{% url 'meeting:create' %}">미팅 만들기</a>
     <div>
         {% for meeting in object_list %}
