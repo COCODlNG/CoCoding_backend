@@ -1,59 +1,206 @@
 {% extends 'base.html' %}
-{% block subtitle %}미팅 디테일 수정마니되야됨{% endblock %}
-{% block content_container %}
-    <video autoplay muted class="local-video" id="local-video"></video>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-    {{ object.id|json_script:"room-name" }}
+{% load static %}
+{% block header %}{% endblock %}
+{% block breadcam %}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'codemirror/codemirror.css' %}">
+    <link rel="stylesheet" href="{% static 'codemirror/darcula.css' %}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color:#3c3f41;
+            color:#fff;
+        }
+        .ide-font {
+            color: #afb1b3;
+        }
+        .std-text{
+            width: 100%;
+            height: 100%;
+            background-color: #2b2b2b;
+            border: none;
+        }
+        .std-text:focus{
+            padding: 0 15px 0 15px !important;
+            color: #afb1b3;
+            border: none !important;
+            outline: none !important;
+        }
+        .ide-font:hover{
+            color: #afb1b3;
+        }
+        .nav-link.active{
+            border-bottom: solid 4px #747a80;
+        }
+        .nav{
+            background-color: #323232;
+        }
+        body p {
+            padding:20px;
+        }
+        #leftPane {
+            border: solid 2px #323232;
+            width: 30%;
+            height: 100%;
+            background-color: #2b2b2b;
+        }
+        #topPane {
+            border: solid 2px #323232;
+            width: 100%;
+            height: 70%;
+        }
+        #bottomPane {
+            border: solid 2px #323232;
+            background-color: #2b2b2b;
+            height: 100%;
+            width: 100%;
+        }
+        .dropdown-item:active{
+            background-color: #eeeeee;
+        }
+        .CodeMirror{
+            height: 100%;
+        }
+        .ide-btn{
+            background-color: transparent;
+        }
+        .ide-btn:focus{
+            border: none !important;
+            outline: none !important;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div id="workspace">
+        <div id="leftPane">
+            <video autoplay muted class="local-video" id="local-video1" style="width: 100%"></video>
+            <video autoplay muted class="local-video" id="local-video2" style="width: 100%"></video>
+            <video autoplay muted class="local-video" id="local-video3" style="width: 100%"></video>
+            <video autoplay muted class="local-video" id="local-video4" style="width: 100%"></video>
+            <video autoplay muted class="local-video" id="local-video5" style="width: 100%"></video>
+        </div>
+        <div id="rightPane">
+            <div id="topPane">
+                <textarea id="code-editor">
+def foo():
+    return 0
+                </textarea>
+            </div>
+            <div id="bottomPane">
+                <ul class="nav mb-3" role="tablist" style="margin-bottom: 0; padding-top: 10px">
+                    <li class="nav-item">
+                        <button class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active ide-font" id="input-tab" data-toggle="pill" href="#input-area" role="tab" aria-controls="input-area" aria-selected="true">Input</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link ide-font" id="output-tab" data-toggle="pill" href="#output-area" role="tab" aria-controls="output-area" aria-selected="false">Output</a>
+                    </li>
+                    <li class="nav-item dropdown float-right">
+                        <a class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Python</a>
+                            <a class="dropdown-item" href="#">Java</a>
+                            <a class="dropdown-item" href="#">C</a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="tab-content" style="height: 100%">
+                    <div class="tab-pane fade show active" id="input-area" role="tabpanel" aria-labelledby="input-tab" style="height: 100%">
+                        <textarea class="std-text">
+
+                        </textarea>
+                    </div>
+                    <div class="tab-pane fade" id="output-area" role="tabpanel" aria-labelledby="output-tab" style="height: 100%">
+                        <textarea class="std-text" readonly>
+
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+{% block extra_js %}
+    <script src="{% static 'codemirror/codemirror.js' %}"></script>
+    <script src="{% static 'codemirror/clike.js' %}"></script>
+    <script src="{% static 'codemirror/python.js' %}"></script>
+    <script src="{% static 'splitter/jquery.splitter.js' %}"></script>
     <script>
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        language = 'Python';
+        function setLanguage(){
 
-        const chatSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
-            + roomName
-            + '/'
-        );
+        }
+        $( document ).ready(function() {
+            $("#workspace").splitter({
+                "orientation": "horizontal",
+                "limit": 10
+            });
+            $("#editorPane").splitter({
+                "orientation": "horizontal",
+                "limit": 100
+            });
+            $("#rightPane").splitter({
+                "orientation": "vertical",
+                "limit": 100
+            });
+            // =========================================================================================================
+            const chatSocket = new WebSocket(
+                'ws://'
+                + window.location.host
+                + '/ws/chat/'
+                + {{object.id}}
+                + '/'
+            );
 
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
-        };
+            chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                const doc = editor.getDoc();
+                var pos = editor.getDoc().getCursor();
+                doc.setValue(data.message);
+                doc.setCursor(pos);
+            };
 
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
-        };
+            chatSocket.onclose = function(e) {
+                alert('오류가 발생했습니다.');
+                location.href = "{% url 'meeting:list' %}";
+            };
 
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#chat-message-submit').click();
-            }
-        };
-
-        document.querySelector('#chat-message-submit').onclick = function(e) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message
-            }));
-            messageInputDom.value = '';
-        };
-
-        // 아래로 웹알티씨
-        navigator.getUserMedia(
-            { video: true, audio: true },
-            stream => {
-                const localVideo = document.getElementById("local-video");
-                if (localVideo) {
-                    localVideo.srcObject = stream;
+            // =========================================================================================================
+            navigator.getUserMedia(
+                { video: true, audio: true },
+                stream => {
+                    const localVideo = document.getElementById("local-video1");
+                    if (localVideo) {
+                        localVideo.srcObject = stream;
+                    }
+                },
+                error => {
+                    console.warn(error.message);
                 }
-            },
-            error => {
-                console.warn(error.message);
-            }
-        );
+            );
+            // =========================================================================================================
+            editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
+                mode: "python",
+                theme: "darcula",
+                styleActiveLine: true,
+                lineNumbers: true,
+                lineWrapping: true
+            });
+            editor.on('keyup', function (e) {
+                chatSocket.send(JSON.stringify({
+                    'message': editor.getDoc().getValue()
+                }));
+            });
+        });
     </script>
 {% endblock %}
+{% block footer %}{% endblock %}
