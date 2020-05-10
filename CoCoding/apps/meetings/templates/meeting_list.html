@@ -1,20 +1,25 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block subtitle %}<h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">미팅 리스트</h3>{% endblock %}
+{% block breadcam %}
+    <!-- bradcam_area  -->
+    <div class="bradcam_area bradcam_bg_1">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="bradcam_text">
+
+                        {% block subtitle %}<h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">미팅 리스트</h3>{% endblock %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /bradcam_area  -->
+{% endblock %}
+
 {% block content_container %}
-    {#    <li class="page-item">#}
-    {#        <a href="#" class="page-link">1</a>#}
-    {#    </li>#}
-    {#    <li class="page-item active">#}
-    {#        <a href="#" class="page-link">2</a>#}
-    {#    </li>#}
-    {#    <li class="page-item">#}
-    {#        <a href="#" class="page-link" aria-label="Next">#}
-    {#            <i class="ti-angle-right"></i>#}
-    {#        </a>#}
-    {#    </li>#}
-    <button class="genric-btn info circle" onclick="location.href='{% url 'meeting:create' %}'">미팅 만들기</button>
-    <p></p>
+
     <div>
         {% for meeting in object_list %}
             <div class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">
