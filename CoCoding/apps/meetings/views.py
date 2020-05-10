@@ -1,4 +1,3 @@
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -6,9 +5,8 @@ from django.views.generic import ListView, UpdateView, RedirectView, DetailView,
 
 from apps.meetings.forms import MeetingForm
 from apps.meetings.models import Meeting, MeetingMemberRelation
-from core.views import CheckUserMixin
-
 from apps.users.models import User
+from core.views import CheckUserMixin
 
 
 class MeetingListView(CheckUserMixin, ListView):
@@ -75,7 +73,7 @@ class MeetingMemberUpdateView(View):
     user = None
 
     def post(self, request, *args, **kwargs):
-        username = request.POST.get('member')
+        username = request.POST.get('id_member')
 
         self.user = get_object_or_404(User, username=username)
         self.meeting = get_object_or_404(Meeting, pk=kwargs['pk'])
@@ -87,7 +85,32 @@ class MeetingMemberUpdateView(View):
                 'error': '이미 추가한 아이디입니다.',
             }
             return JsonResponse(context, json_dumps_params={'ensure_ascii': True})
-        return HttpResponse(status=200)
+        context = {
+            'user_id': self.user.id,
+            'user_name': self.user.username,
+            'user_type': '학생',
+            }
+        return JsonResponse(context, json_dumps_params={'ensure_ascii': True})
 
-    def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+
+class MeetingMemberDeleteView(View):
+
+    pk_url_kwarg = 'pk'
+    meeting = None
+    user = None
+
+    def post(self, request, *args, **kwargs):
+
+        user_pk = request.POST.get('delete_id')
+
+        self.user = get_object_or_404(User, pk=user_pk)
+        self.meeting = get_object_or_404(Meeting, pk=kwargs['pk'])
+        try:
+            MeetingMemberRelation.objects.filter(meeting=self.meeting, member=self.user).delete()
+        except Exception:
+            context = {
+                'message': 'already',
+                'error': '이미 삭제한 아이디입니다.',
+            }
+            return JsonResponse(context, json_dumps_params={'ensure_ascii': True})
+        return HttpResponse(status=200)
