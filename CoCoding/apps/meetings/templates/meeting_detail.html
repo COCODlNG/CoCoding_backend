@@ -41,5 +41,19 @@
             }));
             messageInputDom.value = '';
         };
+
+        // 아래로 웹알티씨
+        navigator.getUserMedia(
+            { video: true, audio: true },
+            stream => {
+                const localVideo = document.getElementById("local-video");
+                if (localVideo) {
+                    localVideo.srcObject = stream;
+                }
+            },
+            error => {
+                console.warn(error.message);
+            }
+        );
     </script>
 {% endblock %}
