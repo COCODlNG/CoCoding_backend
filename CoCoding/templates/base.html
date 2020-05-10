@@ -40,7 +40,8 @@
                         <div class="col-xl-3 col-lg-2">
                             <div class="logo">
                                 <a href="{% url 'index' %}">
-                                    <img src="{% static 'img/logo.png' %}" alt="">
+                                    <h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="color : white;margin-top: 20px;font-weight: bold;">CoCoding
+                                        <img src="{% static 'img/cocoding_logo.png' %}" alt="" style="width: auto; height: auto;max-width: 50px;max-height: 50px;"></h3>
                                 </a>
                             </div>
                         </div>
@@ -48,21 +49,9 @@
                             <div class="main-menu  d-none d-lg-block">
                                 <nav>
                                     <ul id="navigation">
-                                        <li><a class="active" href="{% url 'index' %}">Home</a></li>
-                                        <li><a href="{% url 'meeting:list' %}">Meetings</a></li>
-                                        <li><a href="Pricing.html">Pricing</a></li>
-                                        <li><a href="#">blog <i class="ti-angle-down"></i></a>
-                                            <ul class="submenu">
-                                                <li><a href="blog.html">blog</a></li>
-                                                <li><a href="single-blog.html">single-blog</a></li>
-                                            </ul>
-                                        </li>
-                                        <li><a href="#">pages <i class="ti-angle-down"></i></a>
-                                            <ul class="submenu">
-                                                <li><a href="elements.html">elements</a></li>
-                                            </ul>
-                                        </li>
-                                        <li><a href="contact.html">Contact</a></li>
+                                        <li><a class="active" href="{% url 'index' %}" style="font-size: 20px;">Home</a></li>
+                                        <li><a href="{% url 'meeting:list' %}" style="font-size: 20px;">Meetings</a></li>
+                                        <li><a href="https://github.com/COCODlNG" style="font-size: 20px;">Contact</a></li>
                                     </ul>
                                 </nav>
                             </div>
@@ -71,9 +60,9 @@
                             <div class="Appointment">
                                 <div class="book_btn d-none d-lg-block">
                                     {% if user.is_authenticated %}
-                                        <a href="{% url 'user:logout' %}">로그아웃</a>
+                                        <a href="{% url 'user:logout' %}">Sign Out</a>
                                     {% else %}
-                                        <a class="btn btn-primary" href="{% url 'user:login' %}">로그인</a>
+                                        <a class="btn btn-primary" href="{% url 'user:login' %}">Sign In</a>
                                     {% endif %}
 
                                 </div>
@@ -127,12 +116,14 @@
                         <div class="footer_widget">
                             <div class="footer_logo">
                                 <a href="#">
-                                    <img src="{% static 'img/logo.png' %}" alt="">
+                                    <h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="color : white;margin-top: 20px;font-weight: bold;">CoCoding
+                                        <img src="{% static 'img/cocoding_logo.png' %}" alt="" style="width: auto; height: auto;max-width: 50px;max-height: 50px;"></h3>
+
                                 </a>
                             </div>
                             <p>
-                                Firmament morning sixth subdue darkness
-                                creeping gathered divide.
+                                CoCoding is Online Collaborative Coding Service
+                                based on Live Streaming.
                             </p>
                             <div class="socail_links">
                                 <ul>
@@ -158,45 +149,35 @@
                     </div>
                     <div class="col-xl-2 offset-xl-1 col-md-6 col-lg-3">
                         <div class="footer_widget">
-                            <h3 class="footer_title">
-                                Services
+                            <h3 class="footer_title" style="margin-bottom: 20px;">
+                                Sekyo
                             </h3>
                             <ul>
-                                <li><a href="#">Team management</a></li>
-                                <li><a href="#">Collaboration</a></li>
-                                <li><a href="#">Todo</a></li>
-                                <li><a href="#">Events</a></li>
+                                <img src="{% static 'img/segyo.png' %}" alt="" style="width: auto; height: auto;max-width: 150px;max-height: 150px;">
+                                <li><a href="https://github.com/MyungSeKyo">GAY</a></li>
                             </ul>
-
                         </div>
                     </div>
                     <div class="col-xl-2 col-md-6 col-lg-2">
                         <div class="footer_widget">
-                            <h3 class="footer_title">
-                                Useful Links
+                            <h3 class="footer_title" style="margin-bottom: 20px;">
+                                Junseok
                             </h3>
                             <ul>
-                                <li><a href="#">Pricing</a></li>
-                                <li><a href="#">Features</a></li>
-                                <li><a href="#">Blog</a></li>
-                                <li><a href="#">Contact</a></li>
+                                <img src="{% static 'img/junseok.png' %}" alt="" style="width: auto; height: auto;max-width: 150px;max-height: 150px;">
+                                <li><a href="https://github.com/shawn159">Casanova</a></li>
                             </ul>
                         </div>
                     </div>
                     <div class="col-xl-3 col-md-6 col-lg-3">
                         <div class="footer_widget">
-                            <h3 class="footer_title">
-                                Downloads
+                            <h3 class="footer_title" style="margin-bottom: 20px;">
+                                JJaemoon
                             </h3>
                             <ul>
-                                <li>
-                                    <a href="#">
-                                        Download from Apple Store
-
-                                    </a>
-                                </li>
-                                <li><a href="#">
-                                    Download from Play Store
+                                <img src="{% static 'img/jjaem.png' %}" alt="" style="width: auto; height: auto;max-width: 150px;max-height: 150px;">
+                                <li><a href="https://github.com/JungChaeMoon">
+                                    Sex Machine
                                 </a>
                                 </li>
                             </ul>
