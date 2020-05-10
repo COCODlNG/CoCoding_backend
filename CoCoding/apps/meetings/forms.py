@@ -9,5 +9,5 @@ class MeetingForm(forms.ModelForm):
     members = ModelMultipleChoiceField(queryset=User.objects.all())
 
     class Meta:
-        fields = ['title', 'members']
+        fields = ['title', 'description', 'members']
         model = Meeting
