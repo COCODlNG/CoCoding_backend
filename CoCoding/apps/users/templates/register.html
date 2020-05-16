@@ -1,9 +1,48 @@
 {% extends 'base.html' %}
+{% block breadcam %}
+    <!-- bradcam_area  -->
+    <div class="bradcam_area bradcam_bg_1">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="bradcam_text">
+                        <h3>{% block subtitle %}회원가입{% endblock %}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /bradcam_area  -->
+{% endblock %}
 
-{% block content %}
+{% block content_container %}
     <form method="post">
     {% csrf_token %}
-        {{ form.as_p }}
-    <button class="btn btn-primary" type="submit">회원가입 완료</button>
+        <p>
+            <label for="id_username">Username:</label>
+            <input type="text" name="username" maxlength="150" autofocus required id="id_username">
+            <span class="helptext">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</span>
+        </p>
+        {% if form.errors.username %}
+            <ul class='form-errors'>
+                <li style="color: red; font-weight: bold">{{ form.errors.username }}</li>
+            </ul>
+        {% endif %}
+        <p>
+            <label for="id_password1">Password:</label>
+            <input type="password" name="password1" required id="id_password1">
+            <span class="helptext"></span>
+        </p>
+        <p>
+            <label for="id_password2">Password confirmation:</label>
+            <input type="password" name="password2" required id="id_password2">
+            <span class="helptext">Enter the same password as before, for verification.</span>
+        </p>
+        {% if form.errors.password2 %}
+            <ul class='form-errors'>
+                <li style="color:red; font-weight: bold">{{ form.errors.password2 }}</li>
+            </ul>
+        {% endif %}
+        <button class="genric-btn info circle" type="submit">회원가입 완료</button>
     </form>
 {% endblock %}
