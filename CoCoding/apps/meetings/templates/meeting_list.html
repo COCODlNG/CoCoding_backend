@@ -40,7 +40,7 @@
                                     <button onclick="location.href='{{ meeting.get_start_url }}'" class="genric-btn info circle">미팅 시작</button>
                                 {% else %}
                                     {% if meeting.is_ongoing %}
-                                        <button onclick="location.href='{{ meeting.get_update_url }}'" class="genric-btn info circle">미팅 관리</button>
+                                        <button onclick="location.href='{{ meeting.get_detail_url }}'" class="genric-btn info circle">미팅 참가</button>
                                     {% else %}
                                         <a href="" class="genric-btn info circle">미팅 참가</a>
                                     {% endif %}
