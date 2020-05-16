@@ -13,9 +13,16 @@
                             <h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" >CoCoding<br>
                                 </h3>
                             <p class="wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".1s">Let's Start CoCoding with Capstone Project~</p>
-                            <div class="video_service_btn wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".1s">
-                                <a href="#" class="boxed-btn3">Sign Up</a>
-                            </div>
+                            {% if not user.is_authenticated %}
+                                <div class="video_service_btn wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".1s">
+                                    <a href="{% url 'user:signup' %}" class="boxed-btn3">Sign Up</a>
+                                </div>
+                            {% else %}
+                                <div class="video_service_btn wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".1s">
+                                    <a href="{% url 'meeting:list' %}" class="boxed-btn3">Meetings</a>
+                                </div>
+                            {% endif %}
+
                         </div>
                     </div>
                     <div class="col-xl-5 col-md-6">
