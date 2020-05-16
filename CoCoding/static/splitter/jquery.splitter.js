@@ -264,7 +264,7 @@
 			"div2" : div2,
 			"resizebar" : resizebar,
 			"orientation" : function() {
-				var cursor = self.resizebar.css("cursor").toLowerCase();
+				var cursor = self.resizebar.css("cursor");
 				return cursor == "col-resize" ? "horizontal" : "vertical";
 			},
 			"paneResized" : function(func) {
