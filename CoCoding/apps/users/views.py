@@ -7,8 +7,6 @@ from django.views.generic import RedirectView, CreateView
 
 from .forms import UserCreationForm
 
-from core.views import CheckUserMixin
-
 
 class LoginView(BaseLoginView):
     template_name = 'login.html'
@@ -17,7 +15,7 @@ class LoginView(BaseLoginView):
         return reverse_lazy('meeting:list')
 
 
-class LogoutView(CheckUserMixin, RedirectView):
+class LogoutView(RedirectView):
     url = reverse_lazy('index')
 
     @method_decorator(never_cache)
