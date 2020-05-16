@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse_lazy
 from django_extensions.db.models import TimeStampedModel
+from hashid_field import HashidField
 
 
 class MeetingMemberRelation(TimeStampedModel):
@@ -19,9 +20,10 @@ class MeetingMemberRelation(TimeStampedModel):
 
 class Meeting(TimeStampedModel):
     title = models.CharField(max_length=30, default='Untitled')
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, default='Enter the description')
     host = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='+')
     members = models.ManyToManyField('users.User', related_name='meetings', through='meetings.MeetingMemberRelation')
+    url_hash = HashidField(null=True)
     is_ongoing = models.BooleanField(default=False)
 
     def __str__(self):
@@ -48,3 +50,6 @@ class Meeting(TimeStampedModel):
 
     def get_start_url(self):
         return reverse_lazy('meeting:start', kwargs={'pk': self.pk})
+
+    def get_invitation_url(self):
+        return reverse_lazy('meeting:invitation', kwargs={'hash': self.url_hash})
