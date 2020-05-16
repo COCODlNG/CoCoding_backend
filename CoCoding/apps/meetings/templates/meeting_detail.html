@@ -5,71 +5,7 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'codemirror/codemirror.css' %}">
     <link rel="stylesheet" href="{% static 'codemirror/darcula.css' %}">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color:#3c3f41;
-            color:#fff;
-        }
-        .ide-font {
-            color: #afb1b3;
-        }
-        .std-text{
-            width: 100%;
-            height: 100%;
-            background-color: #2b2b2b;
-            border: none;
-        }
-        .std-text:focus{
-            padding: 0 15px 0 15px !important;
-            color: #afb1b3 !important;
-            border: none !important;
-            outline: none !important;
-        }
-        .ide-font:hover{
-            color: #afb1b3;
-        }
-        .nav-link.active{
-            border-bottom: solid 4px #747a80;
-        }
-        .nav{
-            background-color: #323232;
-        }
-        body p {
-            padding:20px;
-        }
-        #leftPane {
-            border: solid 2px #323232;
-            width: 30%;
-            height: 100%;
-            background-color: #2b2b2b;
-        }
-        #topPane {
-            border: solid 2px #323232;
-            width: 100%;
-            height: 70%;
-        }
-        #bottomPane {
-            border: solid 2px #323232;
-            background-color: #2b2b2b;
-            height: 100%;
-            width: 100%;
-        }
-        .dropdown-item:active{
-            background-color: #eeeeee;
-        }
-        .CodeMirror{
-            height: 100%;
-        }
-        .ide-btn{
-            background-color: transparent;
-        }
-        .ide-btn:focus{
-            border: none !important;
-            outline: none !important;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/meeting_detail.css' %}">
 {% endblock %}
 {% block content %}
     <div id="workspace">
@@ -103,9 +39,9 @@ print('hello python!!')
                     <li class="nav-item dropdown float-right">
                         <a id="languageDropdown" class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item set-lang" name="Python" href="#">Python</a>
-                            <a class="dropdown-item set-lang" name="Java" href="#">Java</a>
-                            <a class="dropdown-item set-lang" name="C" href="#">C</a>
+                            <a class="dropdown-item set-lang" name="python" href="#">Python</a>
+                            <a class="dropdown-item set-lang" name="java" href="#">Java</a>
+                            <a class="dropdown-item set-lang" name="c" href="#">C</a>
                         </div>
                     </li>
                 </ul>
@@ -127,16 +63,22 @@ print('hello python!!')
 {% endblock %}
 
 
-
 {% block extra_js %}
-    {% csrf_token %}
     <script src="{% static 'codemirror/codemirror.js' %}"></script>
     <script src="{% static 'codemirror/clike.js' %}"></script>
     <script src="{% static 'codemirror/python.js' %}"></script>
     <script src="{% static 'splitter/jquery.splitter.js' %}"></script>
+    <script src="{% static 'js/meeting_detail.js' %}"></script>
     <script>
+        // =============================================================================================================
         language = 'Python';
         chatSocket = null;
+
+        function setLanguage(lang) {
+            $('#languageDropdown').html(LANG_MAP[lang].name);
+            editor.setOption('mode', LANG_MAP[lang].mode);
+            editor.getDoc().setValue(LANG_MAP[lang].template);
+        }
         function setLanguage(lan, flag){
             language = lan;
             $('#languageDropdown').html(lan);
