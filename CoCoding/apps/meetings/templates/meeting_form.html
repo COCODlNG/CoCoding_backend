@@ -24,7 +24,7 @@
             <div class="input-group">
                 <input class="form-control valid" name="id_member" maxlength="30" required id="id_member" value="" type="text" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter the member'" placeholder="Enter the member">
                 <div class="input-group-append">
-                    <button class="search-button genric-btn info circle" type="button">검색</button>
+                    <button class="search-button genric-btn info circle" type="button" style="border-top-left-radius: 0; border-bottom-left-radius: 0">검색</button>
                 </div>
             </div>
 
@@ -38,12 +38,12 @@
                             <div class="percentage">Delete</div>
                         </div>
 
-                        {% for user in object.members.all %}
+                        {% for member in object.members.all %}
                             <div class="table-row">
-                                <div class="serial" type="text" style="width: 11.83%; padding-left: 30px;">{{ user.id }}</div>
-                                <div class="country" type="text" style="width: 17.74%;">{{ user.uesrname }}</div>
+                                <div class="serial" type="text" style="width: 11.83%; padding-left: 30px;">{{ member.id }}</div>
+                                <div class="country" type="text" style="width: 17.74%;">{{ member.username }}</div>
                                 <div class="visit" style="width: 19.74%;">관리자</div>
-                                <button class="delete-btn genric-btn info circle" type="button" data-pk="{{ user.id }}" >삭제</button>
+                                <button class="delete-btn genric-btn info circle" type="button" data-pk="{{ member.id }}" >삭제</button>
                             </div>
                         {% endfor %}
                     </div>
@@ -95,7 +95,7 @@
                 )
             })
 
-            $('.delete-btn').click(function () {
+            $('body').on('click', '.delete-btn', function () {
                 var serial = $(this).data('pk');
                 $.ajax({
                     type: 'POST',
@@ -107,13 +107,10 @@
                     },
                     success: function (res) {
 
+                        window.location.reload()
                     },
                     error: function (error) {
-                        if(res['message'])
-                            newAlert(res['error']);
-                        else {
-
-                        }
+                        window.location.reload()
 
                     },
                 })
