@@ -1,9 +1,165 @@
 {% extends 'base.html' %}
-{% block subtitle %}미팅 폼{% endblock %}
+{% block extra_css %}
+    <style>
+        .modal{
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000000;
+            display: none;
+            overflow: hidden;
+            outline: 0;
+        }
+    </style>
+{% endblock %}
+{% block subtitle %}<h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">미팅 만들기</h3>{% endblock %}
 {% block content_container %}
-    <form action="." method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-primary">확인</button>
-    </form>
+    <div class="row">
+    <div class="col-sm-6">
+        <h1 class="contact-title">미팅에 멤버를 추가해주세요!</h1>
+    </div>
+    <div class="col-sm-6">
+
+        <button type="button" class="genric-btn info circle" data-toggle="modal" data-target="#exampleModal">Invitation Link</button>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Invitation Link</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            <h4>링크를 공유해 멤버들을 초대해 보세요!</h4>
+                        </p>
+                        <p>
+                            {{ request.get_host }}{{ object.get_invitation_url }}
+                        </p>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="genric-btn info circle" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <form class="form-contact contact_form" action="." method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_title">Title:</label>
+                    <input class="form-control valid" name="title" maxlength="30" required id="id_title" value="" type="text" placeholder="{{ object.title }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_description">Description:</label>
+                    <textarea class="form-control w-100" name="description" required id="id_description" cols="40" rows="10" placeholder="{{ object.description }}"></textarea>
+                </div>
+                <button class="genric-btn info circle">미팅 만들기</button>
+            </form>
+        </div>
+        <div class="col-sm-6">
+
+            <label for="id_member">Member Search:</label>
+            <div class="input-group">
+                <input class="form-control valid" name="id_member" maxlength="30" required id="id_member" value="" type="text" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter the member'" placeholder="Enter the member">
+                <div class="input-group-append">
+                    <button class="search-button genric-btn info circle" type="button" style="border-top-left-radius: 0; border-bottom-left-radius: 0">검색</button>
+                </div>
+            </div>
+
+            <div class="section-top-border">
+                <div class="progress-table-wrap">
+                    <div class="progress-table">
+                        <div class="table-head">
+                            <div class="serial">#</div>
+                            <div class="visit" type="text">Name</div>
+                            <div class="visit" type="text">Member type</div>
+                            <div class="percentage">Delete</div>
+                        </div>
+
+                        {% for member in object.members.all %}
+                            <div class="table-row">
+                                <div class="serial" type="text" style="width: 11.83%; padding-left: 30px;">{{ member.id }}</div>
+                                <div class="country" type="text" style="width: 17.74%;">{{ member.username }}</div>
+                                <div class="visit" style="width: 19.74%;">관리자</div>
+                                <button class="delete-btn genric-btn info circle" type="button" data-pk="{{ member.id }}" >삭제</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block extra_js %}
+        <script type="text/javascript">
+            function newAlert (name){
+                alert(name);
+                return false;
+            }
+            $(document).ready(function () {
+                $('.search-button').click(function () {
+                        var username = $('#id_member').val()
+                        $.ajax({
+                            type: 'POST',
+                            url: '{% url 'meeting:member_update' object.pk %}',
+                            dataType: 'json',
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                'id_member': username
+                            },
+                            success: function (res) {
+                                if(res['message'])
+                                    newAlert(res['error']);
+
+                                else {
+                                    var user_id = res['user_id'];
+                                    var user_name = res['user_name'];
+                                    var user_type = res['user_type']
+                                    $('.progress-table').append(
+                                        '<div class="table-row">\n' +
+                                        '                                <div class="serial" type="text" style="width: 11.83%; padding-left: 30px;">'+ user_id +'</div>\n' +
+                                        '                                <div class="country" type="text" style="width: 17.74%;">'+ user_name +'</div>\n' +
+                                        '                                <div class="visit" style="width: 19.74%;">관리자</div>\n' +
+                                        '                                <button class="delete-btn genric-btn info circle" type="button" data-pk="' + user_id +'" >삭제</button>\n' +
+                                        '                            </div>'
+                                    )
+                                }
+                            },
+                            error: function (error) {
+                                newAlert('존재 하지 않는 아이디입니다.');
+                            }
+                        });
+                    }
+                )
+            })
+
+            $('body').on('click', '.delete-btn', function () {
+                var serial = $(this).data('pk');
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url 'meeting:member_delete' object.pk%}',
+                    dataType: 'json',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'delete_id': serial
+                    },
+                    success: function (res) {
+                        window.location.reload()
+                    },
+                    error: function (error) {
+                        window.location.reload()
+                    },
+                })
+            })
+
+        </script>
+    {% endblock %}
 {% endblock %}

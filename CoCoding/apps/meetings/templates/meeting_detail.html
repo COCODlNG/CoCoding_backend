@@ -1,59 +1,219 @@
 {% extends 'base.html' %}
-{% block subtitle %}미팅 디테일 수정마니되야됨{% endblock %}
-{% block content_container %}
-    <video autoplay muted class="local-video" id="local-video"></video>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-    {{ object.id|json_script:"room-name" }}
+{% load static %}
+{% block header %}{% endblock %}
+{% block breadcam %}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'codemirror/codemirror.css' %}">
+    <link rel="stylesheet" href="{% static 'codemirror/darcula.css' %}">
+    <link rel="stylesheet" href="{% static 'css/meeting_detail.css' %}">
+{% endblock %}
+{% block content %}
+    <div id="workspace">
+        <div id="leftPane">
+            <video autoplay muted id="localVideo" style="width: 100%"></video>
+        </div>
+        <div id="rightPane">
+            <div id="topPane">
+                <textarea id="code-editor">
+print('hello python!!')
+                </textarea>
+            </div>
+            <div id="bottomPane">
+                <ul class="nav mb-3" role="tablist" style="margin-bottom: 0; padding-top: 10px">
+                    <li class="nav-item">
+                        <button id="runBtn" class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
+                    </li>
+                    <li class="nav-item">
+                        <button id="stopBtn" class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active ide-font" id="input-tab" data-toggle="pill" href="#input-area" role="tab" aria-controls="input-area" aria-selected="true">Input</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link ide-font" id="output-tab" data-toggle="pill" href="#output-area" role="tab" aria-controls="output-area" aria-selected="false">Output</a>
+                    </li>
+                    <li class="nav-item dropdown float-right">
+                        <a id="languageDropdown" class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item set-lang" name="python" href="#">Python</a>
+                            <a class="dropdown-item set-lang" name="java" href="#">Java</a>
+                            <a class="dropdown-item set-lang" name="c" href="#">C</a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="tab-content" style="height: 100%">
+                    <div class="tab-pane fade show active" id="input-area" role="tabpanel" aria-labelledby="input-tab" style="height: 100%">
+                        <textarea class="std-text" id="stdIn">
+
+                        </textarea>
+                    </div>
+                    <div class="tab-pane fade" id="output-area" role="tabpanel" aria-labelledby="output-tab" style="height: 100%">
+                        <textarea class="std-text" readonly id="stdOut">
+
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_js %}
+    <script src="{% static 'codemirror/codemirror.js' %}"></script>
+    <script src="{% static 'codemirror/clike.js' %}"></script>
+    <script src="{% static 'codemirror/python.js' %}"></script>
+    <script src="{% static 'splitter/jquery.splitter.js' %}"></script>
+    <script src="{% static 'js/meeting_detail.js' %}"></script>
     <script>
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
-
-        const chatSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
-            + roomName
-            + '/'
-        );
-
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
-        };
-
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
-        };
-
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#chat-message-submit').click();
-            }
-        };
-
-        document.querySelector('#chat-message-submit').onclick = function(e) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message
-            }));
-            messageInputDom.value = '';
-        };
-
-        // 아래로 웹알티씨
-        navigator.getUserMedia(
-            { video: true, audio: true },
-            stream => {
-                const localVideo = document.getElementById("local-video");
-                if (localVideo) {
-                    localVideo.srcObject = stream;
+        store = {
+            me: '{{ user.username }}',
+            language: 'python',
+            chatSocket: null,
+            editor: null,
+            users: {
+                test_user: {
+                    connection: new RTCPeerConnection(),
+                    username: 'username'
                 }
-            },
-            error => {
-                console.warn(error.message);
             }
-        );
+        };
+
+        function setLanguage(lang) {
+            $('#languageDropdown').html(LANG_MAP[lang].name);
+            store.editor.setOption('mode', LANG_MAP[lang].mode);
+            store.editor.getDoc().setValue(LANG_MAP[lang].template);
+            store.language = lang;
+        }
+        function setListeners(){
+            $('#runBtn').click(function () {
+                $.ajax({
+                    url: "{% url 'code:run' %}",
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        language: store.language,
+                        code: store.editor.getDoc().getValue(),
+                        std_in: $('.std-text').val()
+                    },
+                    success: function (data) {
+                        alert('실행완료 되었습니다.');
+                        if(data.is_error === "True"){
+                            $('#stdOut').val(data.err_out);
+                        } else{
+                            $('#stdOut').val(data.std_out || data.err_out);
+                        }
+                        $('#output-tab').click();
+                    },
+                    error: function (data) {
+                        alert('에러가 발생했습니다.');
+                    }
+                });
+            });
+
+            $('.set-lang').click(function (e) {
+                setLanguage(e.target.name);
+            })
+
+            $("#workspace").splitter({
+                "orientation": "horizontal",
+                "limit": 10
+            });
+            $("#editorPane").splitter({
+                "orientation": "horizontal",
+                "limit": 100
+            });
+            $("#rightPane").splitter({
+                "orientation": "vertical",
+                "limit": 100
+            });
+        }
+
+        function sendSocket(type, payload={}){
+            store.chatSocket.send(JSON.stringify({
+                'type': type,
+                'payload': payload
+            }));
+        }
+        async function callUser(data) {
+            if(store.me !== data.username){
+                const connection = new RTCPeerConnection();
+                const offer = await connection.createOffer();
+
+                store.chatSocket.send(JSON.stringify({
+                    action: MAKE_CALL,
+                    to: data.username,
+                    offer: offer
+                }));
+                store.users[data.username] = {
+                    connection: connection
+                };
+            }
+        }
+        function processSocketMessage(recv) {
+            const data = JSON.parse(recv.data);
+            switch (data.action) {
+                    case ADD_USER:
+                        callUser(data);
+                        break;
+                    case DISCARD_USER:
+                        break;
+                }
+        }
+        function setSocket(){
+            store.chatSocket = new WebSocket(
+                'ws://'
+                + window.location.host
+                + '/ws/chat/'
+                + {{object.id}}
+                + '/'
+            );
+
+            store.chatSocket.onmessage = processSocketMessage;
+
+            store.chatSocket.onclose = function(e) {
+                alert('오류가 발생했습니다.');
+                location.href = "{% url 'meeting:list' %}";
+            };
+        }
+        function setEditor(){
+            store.editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
+                mode: "python",
+                theme: "darcula",
+                styleActiveLine: true,
+                lineNumbers: true,
+                lineWrapping: true
+            });
+            store.editor.on('keyup', function (e) {
+                store.chatSocket.send(JSON.stringify({
+                    'message': store.editor.getDoc().getValue()
+                }));
+            });
+        }
+        function setWebRTC(){
+            const { RTCPeerConnection, RTCSessionDescription } = window;
+
+            const peerConnection = new RTCPeerConnection();
+
+        }
+        $( document ).ready(function() {
+            setWebRTC();
+            setListeners();
+            setSocket();
+            setEditor();
+            localStream = navigator.getUserMedia(
+                { video: true, audio: true },
+                stream => {
+                    const localVideo = document.getElementById("localVideo");
+                    if (localVideo) {
+                        localVideo.srcObject = stream;
+                    }
+                },
+                error => {
+                    alert("비디오, 오디오 스트림 획득에 실패했습니다.");
+                }
+            );
+        });
     </script>
 {% endblock %}
+{% block footer %}{% endblock %}

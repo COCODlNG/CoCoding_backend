@@ -4,6 +4,7 @@ import subprocess
 from subprocess import Popen, PIPE
 import conf.settings
 import os
+import pathlib
 import shutil
 
 app = Celery('run_code')
@@ -155,6 +156,7 @@ def execute_code(code_dict, input, language_type, pk):
 
     shutil.rmtree(code_dir_name)
     return end_msg, output, error
+
 
 
 if __name__ == '__main__':

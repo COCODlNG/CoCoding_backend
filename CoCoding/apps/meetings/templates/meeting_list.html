@@ -1,27 +1,58 @@
 {% extends 'base.html' %}
-{% block subtitle %}미팅 리스트{% endblock %}
+{% load static %}
+{% block breadcam %}
+    <!-- bradcam_area  -->
+    <div class="bradcam_area bradcam_bg_1">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12 row">
+                    <div class="bradcam_text col-xl-8">
+
+                        {% block subtitle %}<h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">미팅 리스트</h3>{% endblock %}
+
+                    </div>
+                    <div class="col-xl-4">
+                        <a class="genric-btn info-border circle" href="{% url 'meeting:create' %}">미팅 만들기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /bradcam_area  -->
+{% endblock %}
+
 {% block content_container %}
-    <a class="btn btn-primary" href="{% url 'meeting:create' %}">미팅 만들기</a>
+
     <div>
         {% for meeting in object_list %}
-            <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                    <h5 class="card-title">{{ meeting.title }}</h5>
-                    <p class="card-text">{{ meeting.host }}</p>
-                    {% if meeting.host == user %}
-                        <a href="{{ meeting.get_update_url }}" class="btn btn-primary">미팅 관리</a>
-                        <a href="{{ meeting.get_start_url }}" class="btn btn-primary">미팅 시작</a>
-                    {% else %}
-                        {% if meeting.is_ongoing %}
-                            <a href="{{ meeting.get_detail_url }}" class="btn btn-primary">미팅 참가</a>
-                        {% else %}
-                            <a href="" class="btn btn-primary disabled">미팅 참가</a>
-                        {% endif %}
-                    {% endif %}
+            <div class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">
+                <div class="col-lg-12 mb-5 mb-lg-0">
+                    <article class="blog_item">
+                        <div class="blog_details">
+                            <a class="d-inline-block" href="{{ meeting.get_start_url }}">
+                                <h2>{{ meeting.title }}</h2>
+                            </a>
+                            <span>{{ meeting.host }}교수님</span>
+                            <p>{{ meeting.description }}</p>
+                            <ul class="blog-info-link">
+                                {% if meeting.host == user %}
+                                    <button onclick="location.href='{{ meeting.get_update_url }}'" class="genric-btn info circle">미팅 관리</button>
+                                    <button onclick="location.href='{{ meeting.get_start_url }}'" class="genric-btn info circle">미팅 시작</button>
+                                {% else %}
+                                    {% if meeting.is_ongoing %}
+                                        <button onclick="location.href='{{ meeting.get_detail_url }}'" class="genric-btn info circle">미팅 참가</button>
+                                    {% else %}
+                                        <a href="" class="genric-btn info circle">미팅 참가</a>
+                                    {% endif %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </article>
                 </div>
             </div>
         {% empty %}
             <h1>미팅이 없습니다.</h1>
         {% endfor %}
     </div>
+
 {% endblock %}
