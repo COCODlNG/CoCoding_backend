@@ -1,7 +1,10 @@
-import subprocess
-import conf.settings
 from celery import Celery
 from apps.codes.models import Code
+import subprocess
+from subprocess import Popen, PIPE
+import conf.settings
+import os
+import shutil
 
 app = Celery('run_code')
 
@@ -69,51 +72,90 @@ class CodeExecutor:
         )
 
 
-def execute_code(code, language_type, pk):
-    C, JAVA, PYTHON = 0, 1, 2
-    code_dir = conf.settings.BASE_DIR + '/tasks/task_code/'
+def construct_code_tree(code_dict, language_type, code_dir):
+    cmp_dict = {}
+    for key in code_dict.keys():
+        if type(code_dict[key]) == type(cmp_dict):
+            new_dir = code_dir + key
+            os.mkdir(new_dir)
+            new_dir = new_dir + '/'
+            construct_code_tree(code_dict[key], language_type, new_dir)
+        else:
+            file_name = key
+            full_path = code_dir + file_name
+            f = open(full_path, 'w')
+            f.write(code_dict[key])
+            f.close()
+
+
+def execute_code(code_dict, input, language_type, pk):
+    C, JAVA, PYTHON = 'c', 'java', 'python'
+    EXECUTE_COMPLETE, COMPILE_ERROR, RUNTIME_ERROR = 0, 1, 2
+    end_msg = -1
+    output = ''
+    error = ''
+    code_dir_name = conf.settings.BASE_DIR + '/tasks/task_code/' + pk
+    os.mkdir(code_dir_name)
+    code_dir = code_dir_name + '/'
+    construct_code_tree(code_dict, language_type, code_dir)
     if language_type == PYTHON:
-        file_name = pk + '.py'
+        file_name = 'main.py'
         full_path = code_dir + file_name
-        f = open(full_path, 'w')
-        f.write(code)
-        f.close()
-        proc = subprocess.Popen(['python', full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = proc.communicate()
-        return out.decode('utf-8'), err.decode('utf-8')
+        proc = Popen(['python', full_path], stdout=PIPE, stderr=PIPE)
+        out, err = proc.communicate(input= input.encode())
+        if err:
+            end_msg = RUNTIME_ERROR
+        else:
+            end_msg = EXECUTE_COMPLETE
+        output = out.decode('utf-8')
+        error = err.decode('utf-8')
     elif language_type == JAVA:
-        file_name = pk + '.java'
+        file_name = 'Main.java'
         full_path = code_dir + file_name
-        f = open(full_path, 'w')
-        f.write(code)
-        f.close()
-        proc = subprocess.Popen(['javac', '-d', code_dir, '-sourcepath', code_dir ,full_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #TODO stop code and return compile error message right after compile is finished
+        proc = Popen(['javac', '-d', code_dir, '-sourcepath', code_dir ,full_path], stdout=PIPE,
+                     stdin=PIPE, stderr=PIPE)
         out, err = proc.communicate()
-        #out.decode('utf-8')
-        #err.decode('utf-8')
-        proc = subprocess.Popen(['java', '-classpath', code_dir, pk], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = proc.communicate()
-        return out.decode('utf-8'), err.decode('utf-8')
+        if err:
+            end_msg = COMPILE_ERROR
+            output = out.decode('utf-8')
+            error = err.decode('utf-8')
+        else:
+            full_path = code_dir + ':' + 'Main'
+            proc = Popen(['java', '-classpath', code_dir, 'Main'], stdout=PIPE,
+                         stdin=PIPE, stderr=PIPE)
+            out, err = proc.communicate(input= input.encode())
+            if err:
+                end_msg = RUNTIME_ERROR
+            else:
+                end_msg = EXECUTE_COMPLETE
+            output = out.decode('utf-8')
+            error = err.decode('utf-8')
     elif language_type == C:
-        file_name = pk + '.c'
+        file_name = 'main.c'
         full_path = code_dir + file_name
         execute_file_name = code_dir + pk
         print(execute_file_name)
-        f = open(full_path, 'w')
-        f.write(code)
-        f.close()
-        proc = subprocess.Popen(['gcc', full_path, '-o', execute_file_name], stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        # TODO stop code and return compile error message right after compile is finished
+        proc = Popen(['gcc', full_path, '-o', execute_file_name], stdout=PIPE,
+                                stdin=PIPE, stderr=PIPE)
         out, err = proc.communicate()
-        #out.decode('utf-8')
-        #err.decode('utf-8')
-        proc = subprocess.Popen([execute_file_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = proc.communicate()
-        return out.decode('utf-8'), err.decode('utf-8')
-    else:
-        return None, None
+        if err:
+            end_msg = COMPILE_ERROR
+            output = out.decode('utf-8')
+            error = err.decode('utf-8')
+        else:
+            proc = Popen([execute_file_name], stdout=PIPE,
+                         stdin=PIPE, stderr=PIPE)
+            out, err = proc.communicate(input = input.encode())
+            if err:
+                end_msg = RUNTIME_ERROR
+            else:
+                end_msg = EXECUTE_COMPLETE
+            output = out.decode('utf-8')
+            error = err.decode('utf-8')
+
+    shutil.rmtree(code_dir_name)
+    return end_msg, output, error
+
 
 if __name__ == '__main__':
     pass
