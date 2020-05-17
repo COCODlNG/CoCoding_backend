@@ -12,7 +12,7 @@ class Code(TimeStampedModel):
         (COMPLETED, '완료'),
         (FAILED, '실패'),
     )
-    C, JAVA, PYTHON = 0, 1, 2
+    C, JAVA, PYTHON = 'c', 'java', 'python'
     LANGUAGE_CHOICES = (
         (C, 'C'),
         (JAVA, 'Java'),
@@ -22,7 +22,7 @@ class Code(TimeStampedModel):
     std_out = models.TextField(null=True, blank=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=QUEUED)
     code = models.TextField()
-    language = models.IntegerField(choices=LANGUAGE_CHOICES, default=C)
+    language = models.CharField(choices=LANGUAGE_CHOICES, default=C, max_length=10)
     author = models.ForeignKey('users.User', on_delete=models.CASCADE)
 
     def __str__(self):
