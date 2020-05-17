@@ -7,25 +7,19 @@ const C_MODE = 'text/x-csrc';
 const JAVA_MODE = 'text/x-java';
 const PYTHON_MODE = 'python';
 
-const C_TEMPLATE = `
-#include<stdio.h>
+const C_TEMPLATE = `#include<stdio.h>
 
 void main(){
     printf("hello C!");
-}
-`;
+}`;
 
-const PYTHON_TEMPLATE = `
-print('hello python!')
-`;
+const PYTHON_TEMPLATE = "print('hello python!')";
 
-const JAVA_TEMPLATE = `
-public class Main {
+const JAVA_TEMPLATE = `public class Main {
     public static void main(String[] args) {
         System.out.println("Hello java!");
     }
-}
-`;
+}`;
 
 const LANG_MAP = {
     [C]: {
@@ -45,3 +39,7 @@ const LANG_MAP = {
     }
 }
 // =====================================================================================================================
+const DISCARD_USER = 'discard_user';
+const ADD_USER = 'add_user';
+const MAKE_CALL = 'make_call';
+
