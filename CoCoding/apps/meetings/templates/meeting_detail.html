@@ -10,11 +10,7 @@
 {% block content %}
     <div id="workspace">
         <div id="leftPane">
-            <video autoplay muted class="local-video" id="local-video1" style="width: 100%"></video>
-            <video autoplay muted class="local-video" id="local-video2" style="width: 100%"></video>
-            <video autoplay muted class="local-video" id="local-video3" style="width: 100%"></video>
-            <video autoplay muted class="local-video" id="local-video4" style="width: 100%"></video>
-            <video autoplay muted class="local-video" id="local-video5" style="width: 100%"></video>
+            <video autoplay muted id="localVideo" style="width: 100%"></video>
         </div>
         <div id="rightPane">
             <div id="topPane">
@@ -70,57 +66,34 @@ print('hello python!!')
     <script src="{% static 'splitter/jquery.splitter.js' %}"></script>
     <script src="{% static 'js/meeting_detail.js' %}"></script>
     <script>
-        // =============================================================================================================
-        language = 'Python';
-        chatSocket = null;
+        store = {
+            me: '{{ user.username }}',
+            language: 'python',
+            chatSocket: null,
+            editor: null,
+            users: {
+                test_user: {
+                    connection: new RTCPeerConnection(),
+                    username: 'username'
+                }
+            }
+        };
 
         function setLanguage(lang) {
             $('#languageDropdown').html(LANG_MAP[lang].name);
-            editor.setOption('mode', LANG_MAP[lang].mode);
-            editor.getDoc().setValue(LANG_MAP[lang].template);
+            store.editor.setOption('mode', LANG_MAP[lang].mode);
+            store.editor.getDoc().setValue(LANG_MAP[lang].template);
+            store.language = lang;
         }
-        function setLanguage(lan, flag){
-            language = lan;
-            $('#languageDropdown').html(lan);
-            var template = '';
-            if(lan === 'Python'){
-                template = `print('hello python!!')`;
-                editor.setOption('mode', 'python');
-            } else if (lan === 'Java') {
-                template = `public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello java!!");
-    }
-}
-                `;
-                editor.setOption('mode', 'text/x-java');
-            } else {
-                template = `#include<stdio.h>
-
-void main(){
-    printf("hello C!!");
-}
-                `;
-                editor.setOption('mode', 'text/x-csrc');
-            }
-            if(!flag){
-                chatSocket.send(JSON.stringify({
-                    'message': lan
-                }));
-            }
-
-            editor.getDoc().setValue(template);
-        }
-        $( document ).ready(function() {
+        function setListeners(){
             $('#runBtn').click(function () {
-
                 $.ajax({
                     url: "{% url 'code:run' %}",
                     type: "POST",
                     data: {
                         csrfmiddlewaretoken: '{{ csrf_token }}',
-                        language: language,
-                        code: editor.getDoc().getValue(),
+                        language: store.language,
+                        code: store.editor.getDoc().getValue(),
                         std_in: $('.std-text').val()
                     },
                     success: function (data) {
@@ -137,15 +110,11 @@ void main(){
                     }
                 });
             });
-            $('#stopBtn').click(function () {
 
-            });
-
-            // =========================================================================================================
             $('.set-lang').click(function (e) {
-                setLanguage(e.target.innerHTML);
+                setLanguage(e.target.name);
             })
-            // =========================================================================================================
+
             $("#workspace").splitter({
                 "orientation": "horizontal",
                 "limit": 10
@@ -158,8 +127,41 @@ void main(){
                 "orientation": "vertical",
                 "limit": 100
             });
-            // =========================================================================================================
-            chatSocket = new WebSocket(
+        }
+
+        function sendSocket(type, payload={}){
+            store.chatSocket.send(JSON.stringify({
+                'type': type,
+                'payload': payload
+            }));
+        }
+        async function callUser(data) {
+            if(store.me !== data.username){
+                const connection = new RTCPeerConnection();
+                const offer = await connection.createOffer();
+
+                store.chatSocket.send(JSON.stringify({
+                    action: MAKE_CALL,
+                    to: data.username,
+                    offer: offer
+                }));
+                store.users[data.username] = {
+                    connection: connection
+                };
+            }
+        }
+        function processSocketMessage(recv) {
+            const data = JSON.parse(recv.data);
+            switch (data.action) {
+                    case ADD_USER:
+                        callUser(data);
+                        break;
+                    case DISCARD_USER:
+                        break;
+                }
+        }
+        function setSocket(){
+            store.chatSocket = new WebSocket(
                 'ws://'
                 + window.location.host
                 + '/ws/chat/'
@@ -167,49 +169,50 @@ void main(){
                 + '/'
             );
 
-            chatSocket.onmessage = function(e) {
-                const data = JSON.parse(e.data);
-                const doc = editor.getDoc();
-                var pos = editor.getDoc().getCursor();
-                if(data.lang){
-                    setLanguage(data.lang, true)
-                } else {
-                    doc.setValue(data.message);
-                    doc.setCursor(pos);
-                }
-            };
+            store.chatSocket.onmessage = processSocketMessage;
 
-            chatSocket.onclose = function(e) {
+            store.chatSocket.onclose = function(e) {
                 alert('오류가 발생했습니다.');
                 location.href = "{% url 'meeting:list' %}";
             };
-
-            // =========================================================================================================
-            navigator.getUserMedia(
-                { video: true, audio: true },
-                stream => {
-                    const localVideo = document.getElementById("local-video1");
-                    if (localVideo) {
-                        localVideo.srcObject = stream;
-                    }
-                },
-                error => {
-                    console.warn(error.message);
-                }
-            );
-            // =========================================================================================================
-            editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
+        }
+        function setEditor(){
+            store.editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
                 mode: "python",
                 theme: "darcula",
                 styleActiveLine: true,
                 lineNumbers: true,
                 lineWrapping: true
             });
-            editor.on('keyup', function (e) {
-                chatSocket.send(JSON.stringify({
-                    'message': editor.getDoc().getValue()
+            store.editor.on('keyup', function (e) {
+                store.chatSocket.send(JSON.stringify({
+                    'message': store.editor.getDoc().getValue()
                 }));
             });
+        }
+        function setWebRTC(){
+            const { RTCPeerConnection, RTCSessionDescription } = window;
+
+            const peerConnection = new RTCPeerConnection();
+
+        }
+        $( document ).ready(function() {
+            setWebRTC();
+            setListeners();
+            setSocket();
+            setEditor();
+            localStream = navigator.getUserMedia(
+                { video: true, audio: true },
+                stream => {
+                    const localVideo = document.getElementById("localVideo");
+                    if (localVideo) {
+                        localVideo.srcObject = stream;
+                    }
+                },
+                error => {
+                    alert("비디오, 오디오 스트림 획득에 실패했습니다.");
+                }
+            );
         });
     </script>
 {% endblock %}
