@@ -1,0 +1,18 @@
+<div>
+
+
+</div>
+<script>
+    function sendMessage(){
+        store.chatSocket.send(JSON.stringify({
+            'action': CHAT_MESSAGE,
+            'message': 'type what you want'
+        }));
+    }
+    $( document ).ready(function() {
+
+    });
+</script>
+<style>
+
+</style>
