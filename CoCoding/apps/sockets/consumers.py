@@ -22,6 +22,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 'type': 'add_user',
+                'username': self.scope['user'].username,
             }
         )
 
@@ -31,62 +32,39 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'discard_user',
+                'username': self.scope['user'].username,
+            }
+        )
 
     # Receive message from WebSocket
     async def receive(self, text_data=None, bytes_data=None):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        text_data = json.loads(text_data)
+        text_data['username'] = self.scope['user'].username
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'send_message',
+                'message': text_data,
+            }
+        )
 
-        if message in ['Python', 'Java', 'C']:
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': message
-                }
-            )
-        else:
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': message
-                }
-            )
-
-    async def chat_message(self, event):
-        message = event['message']
-        if message in {'Python', 'Java', 'C'}:
-            await self.send(text_data=json.dumps({
-                'lang': message
-            }))
-        else:
-            await self.send(text_data=json.dumps({
-                'message': message
-            }))
+    async def send_message(self, data):
+        data = data['message']
+        data['from'] = self.scope['user'].username
+        await self.send(text_data=json.dumps(data))
 
     async def add_user(self, event):
-        user = self.scope['user']
         await self.send(text_data=json.dumps({
             'action': 'add_user',
-            'username': user.username,
+            'username': event['username'],
         }))
 
-    async def call_user(self, data):
-        user = self.scope['user']
-        to = data['to']
+    async def discard_user(self, event):
         await self.send(text_data=json.dumps({
-            'action': 'call_user',
-            'from': user.username,
-            'to': data['to'],
-            'offer': data['offer'],
-        }))
-
-    async def answer(self, data):
-        user = self.scope['user']
-        await self.send(text_data=json.dumps({
-            'action': 'add_user',
-            'username': user.username,
+            'action': 'discard_user',
+            'username': event['username'],
         }))
