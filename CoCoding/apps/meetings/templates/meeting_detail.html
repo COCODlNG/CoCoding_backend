@@ -10,12 +10,17 @@
 {% block content %}
     <div id="workspace">
         <div id="leftPane">
-            <video autoplay muted id="localVideo" style="width: 100%"></video>
+            <div id="myElement" style="margin-bottom: -35px;">
+                <video autoplay muted style="width: 100%"></video>
+                <p style="display: inline;position: relative;background-color: rgba(0,0,0,0.8);padding: 10px;top: -42px;color: white">
+                    My Cam
+                </p>
+            </div>
         </div>
         <div id="rightPane">
             <div id="topPane">
                 <textarea id="code-editor">
-print('hello python!!')
+print('hello python!')
                 </textarea>
             </div>
             <div id="bottomPane">
@@ -56,6 +61,7 @@ print('hello python!!')
             </div>
         </div>
     </div>
+    {% include 'chat_modal.html' %}
 {% endblock %}
 
 
@@ -71,11 +77,13 @@ print('hello python!!')
             language: 'python',
             chatSocket: null,
             editor: null,
+            localStream: null,
             users: {
-                test_user: {
-                    connection: new RTCPeerConnection(),
-                    username: 'username'
-                }
+                //    test_user: {
+                //        connection: new RTCPeerConnection(),
+                //        username: 'username'
+                //        element: $element
+                //    }
             }
         };
 
@@ -128,7 +136,14 @@ print('hello python!!')
                 "limit": 100
             });
         }
-
+        function addUserElement(username) {
+            const $newElement = $('#myElement').clone();
+            $newElement.attr('id', username);
+            $newElement.children('p').html(username);
+            store.users[username].element = $newElement;
+            $('#leftPane').append($newElement);
+            return $newElement.children('video')[0];
+        }
         function sendSocket(type, payload={}){
             store.chatSocket.send(JSON.stringify({
                 'type': type,
@@ -137,28 +152,141 @@ print('hello python!!')
         }
         async function callUser(data) {
             if(store.me !== data.username){
-                const connection = new RTCPeerConnection();
-                const offer = await connection.createOffer();
-
-                store.chatSocket.send(JSON.stringify({
-                    action: MAKE_CALL,
-                    to: data.username,
-                    offer: offer
-                }));
+                const connection = new RTCPeerConnection(configuration);
                 store.users[data.username] = {
                     connection: connection
                 };
+                connection.onicecandidate = event => {
+                    if (event.candidate) {
+                        store.chatSocket.send(JSON.stringify({
+                            action: CHANGE_CANDIDATE,
+                            to: data.username,
+                            candidate: event.candidate
+                        }));
+                    }
+                }
+                const videoElement = addUserElement(data.username);
+                connection.ontrack = function({ streams: [stream] }) {
+                    videoElement.srcObject = stream;
+                    //const remoteVideo = document.getElementById("remoteVideo");
+                    //if (remoteVideo) {
+                    //    remoteVideo.srcObject = stream;
+                    //}
+                };
+
+                await navigator.getUserMedia(
+                    {video: true, audio: true},
+                    async stream => {
+                        stream.getTracks().forEach(track => connection.addTrack(track, stream));
+                        const offer = await connection.createOffer({
+                            offerToReceiveVideo: true,
+                            offerToReceiveAudio: true
+                        });
+                        await connection.setLocalDescription(new RTCSessionDescription(offer));
+                        store.chatSocket.send(JSON.stringify({
+                            action: MAKE_CALL,
+                            to: data.username,
+                            offer: offer
+                        }));
+                    },
+                    error => {
+                        console.warn(error.message);
+                    }
+                );
+
             }
+        }
+        async function makeAnswer(data) {
+            if(store.me === data.to) {
+                const connection = new RTCPeerConnection(configuration);
+                store.users[data.username] = {
+                    connection: connection
+                };
+                connection.onicecandidate = event => {
+                    if (event.candidate) {
+                        store.chatSocket.send(JSON.stringify({
+                            action: CHANGE_CANDIDATE,
+                            to: data.username,
+                            candidate: event.candidate
+                        }));
+                    }
+                }
+                const videoElement = addUserElement(data.username);
+                connection.ontrack = function({ streams: [stream] }) {
+                    videoElement.srcObject = stream;
+                    //const remoteVideo = document.getElementById("remoteVideo");
+                    //if (remoteVideo) {
+                    //    remoteVideo.srcObject = stream;
+                    //}
+                };
+                await connection.setRemoteDescription(
+                    new RTCSessionDescription(data.offer)
+                );
+                await navigator.getUserMedia(
+                    {video: true, audio: true},
+                    async stream => {
+                        stream.getTracks().forEach(track => connection.addTrack(track, stream));
+                        const answer = await connection.createAnswer({
+                            offerToReceiveVideo: true,
+                            offerToReceiveAudio: true
+                        });
+                        await connection.setLocalDescription(new RTCSessionDescription(answer));
+                        store.chatSocket.send(JSON.stringify({
+                            action: MAKE_ANSWER,
+                            to: data.username,
+                            answer: answer
+                        }));
+                    },
+                    error => {
+                        console.warn(error.message);
+                    }
+                );
+
+            }
+        }
+        async function setAnswer(data) {
+            if(store.me === data.to){
+                const connection = store.users[data.username].connection;
+                await connection.setRemoteDescription(
+                    new RTCSessionDescription(data.answer)
+                );
+            }
+        }
+        function editCode(data) {
+            const cursor = store.editor.getDoc().getCursor();
+            store.editor.getDoc().setValue(data.code);
+            store.editor.setCursor(cursor)
+        }
+        function discardUser(data) {
+            store.users[data.username].connection.close();
+            store.users[data.username].element.remove();
+            delete store.users[data.username];
         }
         function processSocketMessage(recv) {
             const data = JSON.parse(recv.data);
             switch (data.action) {
-                    case ADD_USER:
-                        callUser(data);
-                        break;
-                    case DISCARD_USER:
-                        break;
-                }
+                case ADD_USER:
+                    callUser(data);
+                    break;
+                case DISCARD_USER:
+                    discardUser(data);
+                    break;
+                case MAKE_CALL:
+                    makeAnswer(data);
+                    break;
+                case MAKE_ANSWER:
+                    setAnswer(data);
+                    break;
+                case EDIT_CODE:
+                    editCode(data);
+                    break;
+                case CHANGE_CANDIDATE:
+                    if(store.me === data.to){
+                        store.users[data.username].connection.addIceCandidate(
+                            new RTCIceCandidate(data.candidate)
+                        ).catch(e=> console.error(e));
+                    }
+            }
         }
         function setSocket(){
             store.chatSocket = new WebSocket(
@@ -186,33 +314,29 @@ print('hello python!!')
             });
             store.editor.on('keyup', function (e) {
                 store.chatSocket.send(JSON.stringify({
-                    'message': store.editor.getDoc().getValue()
+                    'action': EDIT_CODE,
+                    'code': store.editor.getDoc().getValue()
                 }));
             });
         }
-        function setWebRTC(){
-            const { RTCPeerConnection, RTCSessionDescription } = window;
-
-            const peerConnection = new RTCPeerConnection();
-
-        }
         $( document ).ready(function() {
-            setWebRTC();
-            setListeners();
-            setSocket();
-            setEditor();
-            localStream = navigator.getUserMedia(
+            navigator.getUserMedia(
                 { video: true, audio: true },
                 stream => {
-                    const localVideo = document.getElementById("localVideo");
+                    const localVideo = $('#myElement').children('video')[0];
+
                     if (localVideo) {
                         localVideo.srcObject = stream;
                     }
+                    store.localStream = stream;
                 },
                 error => {
                     alert("비디오, 오디오 스트림 획득에 실패했습니다.");
                 }
             );
+            setListeners();
+            setSocket();
+            setEditor();
         });
     </script>
 {% endblock %}
