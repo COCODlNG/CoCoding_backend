@@ -6,3 +6,4 @@ class CheckUserMixin:
         if request.user.is_anonymous:
             return redirect('user:login')
         return super(CheckUserMixin, self).dispatch(request, *args, **kwargs)
+
