@@ -4,6 +4,7 @@
 {% block content_container %}
         <form action="." method="post">
             {% csrf_token %}
+            <input type="hidden" name="hash" value="{{ hash }}">
             {% if form.errors %}
                 <ul class='form-errors'>
                     <li style="color: red; font-weight: bold;">Please enter a correct username and password</li>

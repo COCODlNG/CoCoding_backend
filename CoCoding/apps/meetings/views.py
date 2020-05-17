@@ -1,5 +1,5 @@
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, UpdateView, RedirectView, DetailView, View
 from django.views.generic.edit import BaseUpdateView
@@ -134,6 +134,11 @@ class InvitationRedirectView(CheckUserMixin, RedirectView):
         self.meeting = get_object_or_404(Meeting, url_hash=kwargs['hash'])
 
     def dispatch(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            hash_value = str(kwargs['hash'])
+            login_url = reverse('user:login')
+            return redirect(login_url + '?hash=' + hash_value)
+
         try:
             MeetingMemberRelation.objects.create(meeting=self.meeting, member=self.request.user)
         except Exception:
