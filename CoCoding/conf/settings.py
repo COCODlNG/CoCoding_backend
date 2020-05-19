@@ -158,4 +158,4 @@ CHANNEL_LAYERS = {
 }
 
 HASHID_FIELD_SALT = "a long and secure salt value that is not the same as SECRET_KEY"
-MESSAGE_STORAGE = 'django.contrib.messages.storage.cooke.CookieStorage'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
