@@ -10,12 +10,6 @@
 {% block content %}
     <div id="workspace">
         <div id="leftPane">
-            <div id="myElement" style="margin-bottom: -35px;">
-                <video autoplay muted style="width: 100%"></video>
-                <p style="display: inline;position: relative;background-color: rgba(0,0,0,0.8);padding: 10px;top: -42px;color: white">
-                    My Cam
-                </p>
-            </div>
         </div>
         <div id="rightPane">
             <div id="topPane">
@@ -75,23 +69,28 @@ print('hello python!')
         store = {
             me: '{{ user.username }}',
             language: 'python',
+            current_user: '{{ user.username }}',
+            current_language: 'python',
+            code: PYTHON_TEMPLATE,
             chatSocket: null,
             editor: null,
             localStream: null,
             users: {
-                //    test_user: {
-                //        connection: new RTCPeerConnection(),
-                //        username: 'username'
-                //        element: $element
-                //    }
+                '{{ user.username }}': {
+                    username: '{{ user.username }}',
+                    element: null
+                }
+
             }
         };
 
-        function setLanguage(lang) {
-            $('#languageDropdown').html(LANG_MAP[lang].name);
-            store.editor.setOption('mode', LANG_MAP[lang].mode);
-            store.editor.getDoc().setValue(LANG_MAP[lang].template);
-            store.language = lang;
+        function setLanguage(language, template=false) {
+            $('#languageDropdown').html(LANG_MAP[language].name);
+            store.editor.setOption('mode', LANG_MAP[language].mode);
+            if(template){
+                store.editor.getDoc().setValue(LANG_MAP[language].template);
+            }
+            store.language = language;
         }
         function setListeners(){
             $('#runBtn').click(function () {
@@ -120,7 +119,18 @@ print('hello python!')
             });
 
             $('.set-lang').click(function (e) {
-                setLanguage(e.target.name);
+                setLanguage(e.target.name, true);
+                const code = store.editor.getDoc().getValue();
+                if(store.me === store.current_user){
+                    store.code = code
+                }
+                store.chatSocket.send(JSON.stringify({
+                    'action': CHANGE_CODE,
+                    'code': code,
+                    'language': store.language,
+                    'current_user': store.current_user
+                }));
+
             })
 
             $("#workspace").splitter({
@@ -135,13 +145,26 @@ print('hello python!')
                 "orientation": "vertical",
                 "limit": 100
             });
+
+            $('body').on('click', '.user-element', function() {
+                store.current_user = this.id;
+                store.chatSocket.send(JSON.stringify({
+                    action: GET_CODE,
+                    current_user: store.current_user
+                }));
+                $('.user-element').removeClass('active');
+                $(this).addClass('active');
+            });
         }
-        function addUserElement(username) {
-            const $newElement = $('#myElement').clone();
+        function addUserElement(username, active=false) {
+            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay muted></video><p></p></div>'));
             $newElement.attr('id', username);
             $newElement.children('p').html(username);
             store.users[username].element = $newElement;
             $('#leftPane').append($newElement);
+            if(active){
+                $newElement.addClass('active');
+            }
             return $newElement.children('video')[0];
         }
         function sendSocket(type, payload={}){
@@ -168,20 +191,13 @@ print('hello python!')
                 const videoElement = addUserElement(data.username);
                 connection.ontrack = function({ streams: [stream] }) {
                     videoElement.srcObject = stream;
-                    //const remoteVideo = document.getElementById("remoteVideo");
-                    //if (remoteVideo) {
-                    //    remoteVideo.srcObject = stream;
-                    //}
                 };
 
                 await navigator.getUserMedia(
                     {video: true, audio: true},
                     async stream => {
                         stream.getTracks().forEach(track => connection.addTrack(track, stream));
-                        const offer = await connection.createOffer({
-                            offerToReceiveVideo: true,
-                            offerToReceiveAudio: true
-                        });
+                        const offer = await connection.createOffer();
                         await connection.setLocalDescription(new RTCSessionDescription(offer));
                         store.chatSocket.send(JSON.stringify({
                             action: MAKE_CALL,
@@ -214,10 +230,6 @@ print('hello python!')
                 const videoElement = addUserElement(data.username);
                 connection.ontrack = function({ streams: [stream] }) {
                     videoElement.srcObject = stream;
-                    //const remoteVideo = document.getElementById("remoteVideo");
-                    //if (remoteVideo) {
-                    //    remoteVideo.srcObject = stream;
-                    //}
                 };
                 await connection.setRemoteDescription(
                     new RTCSessionDescription(data.offer)
@@ -226,10 +238,7 @@ print('hello python!')
                     {video: true, audio: true},
                     async stream => {
                         stream.getTracks().forEach(track => connection.addTrack(track, stream));
-                        const answer = await connection.createAnswer({
-                            offerToReceiveVideo: true,
-                            offerToReceiveAudio: true
-                        });
+                        const answer = await connection.createAnswer();
                         await connection.setLocalDescription(new RTCSessionDescription(answer));
                         store.chatSocket.send(JSON.stringify({
                             action: MAKE_ANSWER,
@@ -253,14 +262,31 @@ print('hello python!')
             }
         }
         function editCode(data) {
-            const cursor = store.editor.getDoc().getCursor();
-            store.editor.getDoc().setValue(data.code);
-            store.editor.setCursor(cursor)
+            if(data.current_user === store.current_user){
+                const cursor = store.editor.getDoc().getCursor();
+                store.editor.getDoc().setValue(data.code);
+                store.editor.setCursor(cursor)
+                setLanguage(data.language);
+            } else if (data.current_user === store.me) {
+                store.code = data.code;
+                store.language = data.language
+            }
         }
         function discardUser(data) {
+            $('#' + store.me).click();
             store.users[data.username].connection.close();
             store.users[data.username].element.remove();
             delete store.users[data.username];
+        }
+        function sendCode(data) {
+            if(data.current_user === store.me){
+                store.chatSocket.send(JSON.stringify({
+                    'action': CHANGE_CODE,
+                    'code': store.code,
+                    'language': store.language,
+                    'current_user': store.me
+                }));
+            }
         }
         function processSocketMessage(recv) {
             const data = JSON.parse(recv.data);
@@ -277,8 +303,11 @@ print('hello python!')
                 case MAKE_ANSWER:
                     setAnswer(data);
                     break;
-                case EDIT_CODE:
+                case CHANGE_CODE:
                     editCode(data);
+                    break;
+                case GET_CODE:
+                    sendCode(data);
                     break;
                 case CHANGE_CANDIDATE:
                     if(store.me === data.to){
@@ -313,21 +342,23 @@ print('hello python!')
                 lineWrapping: true
             });
             store.editor.on('keyup', function (e) {
+                const code = store.editor.getDoc().getValue();
+                if(store.me === store.current_user){
+                    store.code = code
+                }
                 store.chatSocket.send(JSON.stringify({
-                    'action': EDIT_CODE,
-                    'code': store.editor.getDoc().getValue()
+                    'action': CHANGE_CODE,
+                    'code': code,
+                    'language': store.language,
+                    'current_user': store.current_user
                 }));
             });
         }
-        $( document ).ready(function() {
+        $(document ).ready(function() {
             navigator.getUserMedia(
                 { video: true, audio: true },
                 stream => {
-                    const localVideo = $('#myElement').children('video')[0];
-
-                    if (localVideo) {
-                        localVideo.srcObject = stream;
-                    }
+                    addUserElement(store.me, true).srcObject = stream;
                     store.localStream = stream;
                 },
                 error => {
