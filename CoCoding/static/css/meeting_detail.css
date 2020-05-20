@@ -61,3 +61,20 @@ body p {
     border: none !important;
     outline: none !important;
 }
+.user-element{
+    margin-bottom: -35px;
+}
+.user-element.active video{
+    border: solid 4px lightgreen;
+}
+.user-element video {
+    width: 100%;
+}
+.user-element p {
+    display: inline;
+    position: relative;
+    background-color: rgba(0,0,0,0.8);
+    padding: 10px;
+    top: -42px;
+    color: white;
+}
