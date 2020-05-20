@@ -44,8 +44,10 @@ const ADD_USER = 'add_user';
 const MAKE_CALL = 'make_call';
 const MAKE_ANSWER = 'make_answer';
 const CHAT_MESSAGE = 'chat_message';
-const EDIT_CODE = 'edit_code';
+const CHANGE_CODE = 'edit_code';
+const CHANGE_CANDIDATE = 'change_candidate'
+const GET_CODE = 'get_code';
+
 const configuration = {
     iceServers: [{'urls': 'stun:stun.l.google.com:19302'}]
 }
-const CHANGE_CANDIDATE = 'change_candidate'
