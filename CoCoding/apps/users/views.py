@@ -1,8 +1,6 @@
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView as BaseLoginView
-from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.shortcuts import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import RedirectView, CreateView
