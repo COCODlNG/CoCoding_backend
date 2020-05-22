@@ -16,46 +16,47 @@
                 <textarea id="code-editor">
 print('hello python!')
                 </textarea>
-            </div>
-            <div id="bottomPane">
-                <ul class="nav mb-3" role="tablist" style="margin-bottom: 0; padding-top: 10px">
-                    <li class="nav-item">
-                        <button id="runBtn" class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
-                    </li>
-                    <li class="nav-item">
-                        <button id="stopBtn" class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active ide-font" id="input-tab" data-toggle="pill" href="#input-area" role="tab" aria-controls="input-area" aria-selected="true">Input</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ide-font" id="output-tab" data-toggle="pill" href="#output-area" role="tab" aria-controls="output-area" aria-selected="false">Output</a>
-                    </li>
-                    <li class="nav-item dropdown float-right">
-                        <a id="languageDropdown" class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item set-lang" name="python" href="#">Python</a>
-                            <a class="dropdown-item set-lang" name="java" href="#">Java</a>
-                            <a class="dropdown-item set-lang" name="c" href="#">C</a>
-                        </div>
-                    </li>
-                </ul>
-                <div class="tab-content" style="height: 100%">
-                    <div class="tab-pane fade show active" id="input-area" role="tabpanel" aria-labelledby="input-tab" style="height: 100%">
+                </div>
+                <div id="bottomPane">
+                    <ul class="nav mb-3" role="tablist" style="margin-bottom: 0; padding-top: 10px">
+                        <li class="nav-item">
+                            <button id="runBtn" class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
+                        </li>
+                        <li class="nav-item">
+                            <button id="stopBtn" class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active ide-font" id="input-tab" data-toggle="pill" href="#input-area" role="tab" aria-controls="input-area" aria-selected="true">Input</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link ide-font" id="output-tab" data-toggle="pill" href="#output-area" role="tab" aria-controls="output-area" aria-selected="false">Output</a>
+                        </li>
+                        <li class="nav-item dropdown float-right">
+                            <a id="languageDropdown" class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item set-lang" name="python" href="#">Python</a>
+                                <a class="dropdown-item set-lang" name="java" href="#">Java</a>
+                                <a class="dropdown-item set-lang" name="c" href="#">C</a>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="tab-content" style="height: 100%">
+                        <div class="tab-pane fade show active" id="input-area" role="tabpanel" aria-labelledby="input-tab" style="height: 100%">
                         <textarea class="std-text" id="stdIn">
 
                         </textarea>
-                    </div>
-                    <div class="tab-pane fade" id="output-area" role="tabpanel" aria-labelledby="output-tab" style="height: 100%">
+                        </div>
+                        <div class="tab-pane fade" id="output-area" role="tabpanel" aria-labelledby="output-tab" style="height: 100%">
                         <textarea class="std-text" readonly id="stdOut">
 
                         </textarea>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% include 'chat_modal.html' %}
+
 {% endblock %}
 
 
@@ -315,6 +316,10 @@ print('hello python!')
                             new RTCIceCandidate(data.candidate)
                         ).catch(e=> console.error(e));
                     }
+                    break;
+                case CHAT_MESSAGE:
+                    recvMessage(recv);
+                    break;
             }
         }
         function setSocket(){
@@ -370,5 +375,7 @@ print('hello python!')
             setEditor();
         });
     </script>
+
+    {% include 'chat_modal.html' %}
 {% endblock %}
 {% block footer %}{% endblock %}
