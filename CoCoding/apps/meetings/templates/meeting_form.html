@@ -16,7 +16,7 @@
 {% endblock %}
 {% block subtitle %}
     <h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">
-        {% if object.pk %}미팅 관리{% else %}미팅 만들기{% endif %}
+        미팅관리
     </h3>
 {% endblock %}
 {% block content_container %}
@@ -44,7 +44,6 @@
                         <p>
                             {{ request.get_host }}{{ object.get_invitation_url }}
                         </p>
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="genric-btn info circle" data-dismiss="modal">Close</button>
@@ -65,7 +64,7 @@
                     <label for="id_description">Description:</label>
                     <textarea class="form-control w-100" name="description" required id="id_description" cols="40" rows="10" placeholder="{{ object.description }}"></textarea>
                 </div>
-                <button class="genric-btn info circle">{% if object.pk %}미팅 관리{% else %}미팅 만들기{% endif %}</button>
+                <button class="genric-btn info circle">완료</button>
             </form>
         </div>
         <div class="col-sm-6">
