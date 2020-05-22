@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, UpdateView, RedirectView, DetailView, View
 from django.views.generic.edit import BaseUpdateView
-
+from django.contrib import messages
 from apps.meetings.forms import MeetingForm
 from apps.meetings.models import Meeting, MeetingMemberRelation
 from apps.users.models import User
@@ -142,9 +142,11 @@ class InvitationRedirectView(CheckUserMixin, RedirectView):
         try:
             MeetingMemberRelation.objects.create(meeting=self.meeting, member=self.request.user)
         except Exception:
+            messages.add_message(self.request, messages.WARNING, '이미 추가된 멤버입니다.')
             return HttpResponseRedirect(reverse_lazy('meeting:list'))
 
         return super(InvitationRedirectView, self).dispatch(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
+        messages.add_message(self.request, messages.INFO, '추가가 완료되었습니다.')
         return reverse_lazy('meeting:list')
