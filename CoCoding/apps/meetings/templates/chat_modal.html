@@ -1,17 +1,156 @@
-<div>
+{% load static %}
+<style>
 
+    .sidebar {
+        height: 100%; /* 100% Full-height */
+        width: 0; /* 0 width - change this with JavaScript */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Stay on top */
+        top: 0;
+        right: 0;
+        background-color: #FFFFFF; /* Black*/
+        overflow-x: hidden; /* Disable horizontal scroll */
+        transition: 0.5s;
+        display: flex ;
+        flex-flow: column;
+    }
+    /* The sidebar links */
+    .sidebar a {
+        padding: 8px 12px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #818181;
+        display: flex;
+        transition: 0.3s;
+    }
+    .sidebar a:hover {
+        color: #f1f1f1;
+    }
+    .sidebar .closebtn {
+        top: 0;
+        right: 0;
+        font-size: 36px;
+        display: flex;
+    }
+
+    .floating-btn {
+        width: 80px;
+        height: 80px;
+        background: #009879;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        text-decoration: none;
+        border-radius: 50%;
+        border: 0;
+        color: #FFFFFF;
+        font-size: 35px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 25);
+        position: absolute;
+        right: 50px;
+        bottom: 20px;
+    }
+    .floating-btn:hover {
+        opacity: 0.8;
+    }
+
+    @media screen and (max-height: 450px) {
+        .sidebar {padding-top: 15px;}
+        .sidebar a {font-size: 18px;}
+    }
+    .chat-embed-top {
+        padding-bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row-reverse;
+    }
+    .fa-paper-plane-o {
+        font-size: 20px;
+    }
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sidebar/3.3.2/jquery.sidebar.min.js"></script>
+
+<div id="mySidebar" class="sidebar">
+    <div class="chat-embed-top">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeChat()">&times;</a>
+        <a href="#">Open Chat</a>
+    </div>
+
+    <div class="msg-wrap" style="height: 100%; overflow-y: scroll ">
+        {#메세지부분#}
+    </div>
+    <div class="card-footer" style="bottom: 0">
+        <div class="input-group">
+            <input type="text" class="form-control type_msg" placeholder="Type your message..." style="border-top-left-radius: 20px; border-bottom-left-radius: 20px"/>
+            <div class="input-group-append">
+                <span class="genric-btn info circle" style="border-top-left-radius: 0; border-bottom-left-radius: 0"><i class="fa fa-paper-plane-o"></i></span>
+            </div>
+        </div>
+    </div>
 
 </div>
+
+<button class="floating-btn" onclick="openChat()"><i class="fa fa-commenting-o" aria-hidden="true"></i></button>
+
 <script>
-    function sendMessage(){
+    function openChat() {
+        document.getElementById("mySidebar").style.width = "450px";
+    }
+
+    function closeChat() {
+        document.getElementById("mySidebar").style.width = "0";
+    }
+
+    function sendMessage(message){
         store.chatSocket.send(JSON.stringify({
             'action': CHAT_MESSAGE,
-            'message': 'type what you want'
+            'message': message
         }));
     }
-    $( document ).ready(function() {
+    function appendHtml(el, str) {
+        var div = document.createElement('div');
+        div.innerHTML = str;
+        while (div.children.length > 0){
+            el.appendChild(div.children[0])
+        }
 
-    });
+        document.querySelector('.msg-wrap').scrollTop = document.querySelector('.msg-wrap').scrollHeight
+    }
+    function recvMessage(e){
+        const data = JSON.parse(e.data);
+        let html = `<div class="media msg">
+                <a class="pull-left" href="#">
+                    <img class="media-object" data-src="holder.js/64x64" alt="64x64" style="width: 32px; height: 32px;" src="{% static 'img/cocoding_logo.png'%}">
+                </a>
+                <div class="media-body" style="display: flex; flex-direction: row-reverse; justify-content: space-between;">
+                    <small class="pull-right time" style="color: #0b0b0b; padding: 20px;"><i class="fa fa-clock-o"></i> 12:10am</small>
+                    <div>
+                        <h5 class="media-heading" style="margin: 0">${data.username}</h5>
+                        <small class="col-lg-10" style="color: #0b0b0b; padding: 0; word-break: break-all;">${data.message}</small>
+                    </div>
+                </div>
+            </div>`;
+
+        appendHtml(document.querySelector('.msg-wrap'), html)
+    }
+    document.querySelector('.card-footer .input-group .form-control.type_msg').focus();
+    document.querySelector('.card-footer .input-group .form-control.type_msg').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('.card-footer .input-group .input-group-append .genric-btn.info.circle').click();
+        }
+    };
+
+    document.querySelector('.card-footer .input-group .input-group-append .genric-btn.info.circle').onclick = function(e) {
+        const messageInputDom = document.querySelector('.card-footer .input-group .form-control.type_msg');
+        const message = messageInputDom.value;
+        sendMessage(message)
+        messageInputDom.value = '';
+    };
+
+
+
 </script>
 <style>
 
