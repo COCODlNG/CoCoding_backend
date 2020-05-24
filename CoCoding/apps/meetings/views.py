@@ -142,11 +142,11 @@ class InvitationRedirectView(CheckUserMixin, RedirectView):
         try:
             MeetingMemberRelation.objects.create(meeting=self.meeting, member=self.request.user)
         except Exception:
-            messages.add_message(self.request, messages.WARNING, '이미 추가된 멤버입니다.')
+            messages.add_message(self.request, messages.WARNING, '이미 참가하고 있는 미팅입니다.')
             return HttpResponseRedirect(reverse_lazy('meeting:list'))
 
         return super(InvitationRedirectView, self).dispatch(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
-        messages.add_message(self.request, messages.INFO, '추가가 완료되었습니다.')
+        messages.add_message(self.request, messages.INFO, '이제 미팅에 참여 할 수 있습니다.')
         return reverse_lazy('meeting:list')
