@@ -25,7 +25,7 @@ SECRET_KEY = 'aa7lii17zu4@nnm8^*eteeuu5jed35dr8fe0l=68p!e)@%wb0v'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.cocoding.kro.kr', 'cocoding.kro.kr']
+ALLOWED_HOSTS = ['www.cocoding.o-r.kr', 'cocoding.o-r.kr']
 
 
 # Application definition
