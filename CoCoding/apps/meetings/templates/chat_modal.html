@@ -125,7 +125,7 @@
                     <img class="media-object" data-src="holder.js/64x64" alt="64x64" style="width: 32px; height: 32px;" src="{% static 'img/cocoding_logo.png'%}">
                 </a>
                 <div class="media-body" style="display: flex; flex-direction: row-reverse; justify-content: space-between;">
-                    <small class="pull-right time" style="color: #0b0b0b; padding: 20px;"><i class="fa fa-clock-o"></i> 12:10am</small>
+                    <small class="pull-right time" style="color: #0b0b0b; padding: 20px;"><i class="fa fa-clock-o"></i> ${(new Date).hhmm()}</small>
                     <div>
                         <h5 class="media-heading" style="margin: 0">${data.username}</h5>
                         <small class="col-lg-10" style="color: #0b0b0b; padding: 0; word-break: break-all;">${data.message}</small>
@@ -149,7 +149,12 @@
         messageInputDom.value = '';
     };
 
+    Date.prototype.hhmm = function () {
+        var hh = this.getHours().toString();
+        var mm = this.getMinutes().toString();
 
+        return hh + ':' + (mm[1]? mm: '0' + mm[0]);
+    };
 
 </script>
 <style>
