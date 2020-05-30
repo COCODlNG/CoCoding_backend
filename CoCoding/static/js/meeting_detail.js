@@ -48,6 +48,11 @@ const CHANGE_CODE = 'edit_code';
 const CHANGE_CANDIDATE = 'change_candidate'
 const GET_CODE = 'get_code';
 
-const configuration = {
+const WEB_RTC_CONF = {
     iceServers: [{'urls': 'stun:stun.l.google.com:19302'}]
+}
+
+const USER_MEDIA_CONF = {
+    video: true,
+    audio: true,
 }
