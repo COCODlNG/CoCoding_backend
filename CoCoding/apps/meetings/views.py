@@ -2,7 +2,7 @@ from django.http import HttpResponseForbidden, JsonResponse, HttpResponse, HttpR
 from django.shortcuts import get_object_or_404, redirect, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, UpdateView, RedirectView, DetailView, View
-from django.views.generic.edit import BaseUpdateView
+from django.views.generic.edit import BaseUpdateView, DeleteView
 from django.contrib import messages
 from apps.meetings.forms import MeetingForm
 from apps.meetings.models import Meeting, MeetingMemberRelation
@@ -72,6 +72,20 @@ class MeetingStartView(CheckUserMixin, RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         return reverse_lazy('meeting:detail', kwargs={'pk': self.meeting.id})
+
+
+class MeetingDeleteView(CheckUserMixin, DeleteView):
+
+    model = Meeting
+    success_url = reverse_lazy('meeting:list')
+    meeting = None
+
+    def get(self, request, *args, **kwargs):
+        self.meeting = get_object_or_404(Meeting, pk=kwargs['pk'])
+        if self.request.user == self.meeting.host:
+            return self.post(request, *args, **kwargs)
+        else:
+            return reverse_lazy('meeting:list')
 
 
 class MeetingMemberUpdateView(View):
