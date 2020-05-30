@@ -1,17 +1,22 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from apps.meetings.models import MeetingMemberRelation
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.users = set()
 
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
 
-        self.users.add(self.scope['user'])
+        self.relation = MeetingMemberRelation.objects.get(
+            member=self.scope['user'],
+            meeting_id=self.scope['url_route']['kwargs']['room_name'],
+        )
+
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -27,7 +32,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def disconnect(self, close_code):
-        self.users.remove(self.scope['user'])
+        self.relation.save()
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -44,6 +49,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         text_data = json.loads(text_data)
         text_data['username'] = self.scope['user'].username
+        if text_data['username'] == text_data['current_user']:
+            self.relation.code = text_data['code']
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -58,9 +65,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(data))
 
     async def add_user(self, event):
+        if not self.relation.code:
+            self.relation.code = {
+                'python': "print('hello python!')",
+                'java': """public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello java!");
+    }
+}
+                """,
+                'c': """#include<stdio.h>
+
+void main(){
+    printf("hello C!");
+}
+                """,
+            }
         await self.send(text_data=json.dumps({
             'action': 'add_user',
             'username': event['username'],
+            'code': self.relation.code,
         }))
 
     async def discard_user(self, event):
