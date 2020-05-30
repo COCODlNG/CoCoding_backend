@@ -7,9 +7,7 @@
             <div class="row">
                 <div class="col-xl-12 row">
                     <div class="bradcam_text col-xl-8">
-
                         {% block subtitle %}<h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">미팅 리스트</h3>{% endblock %}
-
                     </div>
                     <div class="col-xl-4">
                         <a class="genric-btn info-border circle" href="{% url 'meeting:create' %}">미팅 만들기</a>
@@ -38,6 +36,7 @@
                                 {% if meeting.host == user %}
                                     <button onclick="location.href='{{ meeting.get_update_url }}'" class="genric-btn info circle">미팅 관리</button>
                                     <button onclick="location.href='{{ meeting.get_start_url }}'" class="genric-btn info circle">미팅 시작</button>
+                                    <button onclick="javascript: if(confirm('삭제하시겠습니까??')){location.href='{% url 'meeting:delete' meeting.pk %}'}" class="genric-btn info circle">미팅 삭제</button>
                                 {% else %}
                                     {% if meeting.is_ongoing %}
                                         <button onclick="location.href='{{ meeting.get_detail_url }}'" class="genric-btn info circle">미팅 참가</button>
