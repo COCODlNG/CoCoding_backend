@@ -15,7 +15,7 @@
         flex-flow: column;
     }
     /* The sidebar links */
-    .sidebar a {
+    .sidebar h6{
         padding: 8px 12px 8px 32px;
         text-decoration: none;
         font-size: 25px;
@@ -23,7 +23,7 @@
         display: flex;
         transition: 0.3s;
     }
-    .sidebar a:hover {
+    .sidebar h6:hover {
         color: #f1f1f1;
     }
     .sidebar .closebtn {
@@ -51,6 +51,19 @@
         right: 50px;
         bottom: 20px;
     }
+
+    .floating-btn .badge {
+        position: absolute;
+        font-size: 22px !important;
+        top: -10px;
+        right: -10px;
+        padding: 5px 10px;
+        border-radius: 50%;
+        background: red;
+        color: white;
+        font-weight: 400;
+    }
+
     .floating-btn:hover {
         opacity: 0.8;
     }
@@ -74,11 +87,11 @@
 
 <div id="mySidebar" class="sidebar">
     <div class="chat-embed-top">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeChat()">&times;</a>
-        <a href="#">Open Chat</a>
+        <h6 class="closebtn" onclick="closeChat()">&times;</h6>
+        <h6>Open Chat</h6>
     </div>
 
-    <div class="msg-wrap" style="height: 100%; overflow-y: scroll ">
+    <div class="msg-wrap" style="height: 100%; overflow-y: scroll; padding-left: 20px; ">
         {#메세지부분#}
     </div>
     <div class="card-footer" style="bottom: 0">
@@ -92,15 +105,22 @@
 
 </div>
 
-<button class="floating-btn" onclick="openChat()"><i class="fa fa-commenting-o" aria-hidden="true"></i></button>
+<div class="floating-btn" onclick="openChat()">
+    <span><i class="fa fa-commenting-o" aria-hidden="true"></i></span>
+</div>
 
 <script>
+
+    let messageCount = 0;
+
     function openChat() {
         document.getElementById("mySidebar").style.width = "450px";
     }
 
     function closeChat() {
         document.getElementById("mySidebar").style.width = "0";
+        messageCount = 0;
+        $('.floating-btn').html("<span><i class=\"fa fa-commenting-o\" aria-hidden=\"true\"></i></span>")
     }
 
     function sendMessage(message){
@@ -126,7 +146,7 @@
                 </a>
                 <div class="media-body" style="display: flex; flex-direction: row-reverse; justify-content: space-between;">
                     <small class="pull-right time" style="color: #0b0b0b; padding: 20px;"><i class="fa fa-clock-o"></i> ${(new Date).hhmm()}</small>
-                    <div>
+                    <div style="padding-left: 10px;">
                         <h5 class="media-heading" style="margin: 0">${data.username}</h5>
                         <small class="col-lg-10" style="color: #0b0b0b; padding: 0; word-break: break-all;">${data.message}</small>
                     </div>
@@ -134,7 +154,14 @@
             </div>`;
 
         appendHtml(document.querySelector('.msg-wrap'), html)
+        messageCount += 1;
+
+        if(messageCount > 1){
+            $('.floating-btn').html("<span><i class='fa fa-commenting-o' aria-hidden='true'></i></span><span class='badge'>" +messageCount +"</span>");
+        }
+
     }
+
     document.querySelector('.card-footer .input-group .form-control.type_msg').focus();
     document.querySelector('.card-footer .input-group .form-control.type_msg').onkeyup = function(e) {
         if (e.keyCode === 13) {  // enter, return
@@ -157,6 +184,7 @@
 
         return hh + ':' + (mm[1]? mm: '0' + mm[0]);
     };
+
 
 </script>
 <style>
