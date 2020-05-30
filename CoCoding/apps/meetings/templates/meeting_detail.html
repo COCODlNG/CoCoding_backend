@@ -16,45 +16,45 @@
                 <textarea id="code-editor">
 print('hello python!')
                 </textarea>
-                </div>
-                <div id="bottomPane">
-                    <ul class="nav mb-3" role="tablist" style="margin-bottom: 0; padding-top: 10px">
-                        <li class="nav-item">
-                            <button id="runBtn" class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
-                        </li>
-                        <li class="nav-item">
-                            <button id="stopBtn" class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active ide-font" id="input-tab" data-toggle="pill" href="#input-area" role="tab" aria-controls="input-area" aria-selected="true">Input</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link ide-font" id="output-tab" data-toggle="pill" href="#output-area" role="tab" aria-controls="output-area" aria-selected="false">Output</a>
-                        </li>
-                        <li class="nav-item dropdown float-right">
-                            <a id="languageDropdown" class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item set-lang" name="python" href="#">Python</a>
-                                <a class="dropdown-item set-lang" name="java" href="#">Java</a>
-                                <a class="dropdown-item set-lang" name="c" href="#">C</a>
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="tab-content" style="height: 100%">
-                        <div class="tab-pane fade show active" id="input-area" role="tabpanel" aria-labelledby="input-tab" style="height: 100%">
+            </div>
+            <div id="bottomPane">
+                <ul class="nav mb-3" role="tablist" style="margin-bottom: 0; padding-top: 10px">
+                    <li class="nav-item">
+                        <button id="runBtn" class="btn ide-btn"><i class="fa fa-play" style="font-size: 25px;color: #499c54;"></i></button>
+                    </li>
+                    <li class="nav-item">
+                        <button id="stopBtn" class="btn ide-btn"><i class="fa fa-stop" style="font-size: 25px;color: #c75450;margin-right: 30px"></i></button>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active ide-font" id="input-tab" data-toggle="pill" href="#input-area" role="tab" aria-controls="input-area" aria-selected="true">Input</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link ide-font" id="output-tab" data-toggle="pill" href="#output-area" role="tab" aria-controls="output-area" aria-selected="false">Output</a>
+                    </li>
+                    <li class="nav-item dropdown float-right">
+                        <a id="languageDropdown" class="nav-link dropdown-toggle ide-font" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Python</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item set-lang" name="python">Python</a>
+                            <a class="dropdown-item set-lang" name="java">Java</a>
+                            <a class="dropdown-item set-lang" name="c">C</a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="tab-content" style="height: 100%">
+                    <div class="tab-pane fade show active" id="input-area" role="tabpanel" aria-labelledby="input-tab" style="height: 100%">
                         <textarea class="std-text" id="stdIn">
 
                         </textarea>
-                        </div>
-                        <div class="tab-pane fade" id="output-area" role="tabpanel" aria-labelledby="output-tab" style="height: 100%">
+                    </div>
+                    <div class="tab-pane fade" id="output-area" role="tabpanel" aria-labelledby="output-tab" style="height: 100%">
                         <textarea class="std-text" readonly id="stdOut">
 
                         </textarea>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
 {% endblock %}
@@ -70,9 +70,19 @@ print('hello python!')
         store = {
             me: '{{ user.username }}',
             language: 'python',
-            current_user: '{{ user.username }}',
             current_language: 'python',
-            code: PYTHON_TEMPLATE,
+            current_user: '{{ user.username }}',
+            current_user_code: {
+                'python': PYTHON_TEMPLATE,
+                'java': JAVA_TEMPLATE,
+                'c': C_TEMPLATE,
+            },
+            current_user_language: 'python',
+            code: {
+                'python': PYTHON_TEMPLATE,
+                'java': JAVA_TEMPLATE,
+                'c': C_TEMPLATE,
+            },
             chatSocket: null,
             editor: null,
             localStream: null,
@@ -89,9 +99,14 @@ print('hello python!')
             $('#languageDropdown').html(LANG_MAP[language].name);
             store.editor.setOption('mode', LANG_MAP[language].mode);
             if(template){
-                store.editor.getDoc().setValue(LANG_MAP[language].template);
+                if(store.current_user === store.me){
+                    store.language = language
+                    store.editor.getDoc().setValue(store.code[language]);
+                } else {
+                    store.editor.getDoc().setValue(store.current_user_code[language]);
+                }
             }
-            store.language = language;
+            store.current_language = language;
         }
         function setListeners(){
             $('#runBtn').click(function () {
@@ -100,7 +115,7 @@ print('hello python!')
                     type: "POST",
                     data: {
                         csrfmiddlewaretoken: '{{ csrf_token }}',
-                        language: store.language,
+                        language: store.current_language,
                         code: store.editor.getDoc().getValue(),
                         std_in: $('.std-text').val()
                     },
@@ -123,12 +138,13 @@ print('hello python!')
                 setLanguage(e.target.name, true);
                 const code = store.editor.getDoc().getValue();
                 if(store.me === store.current_user){
-                    store.code = code
+                    store.code[store.current_language] = code
                 }
+                store.current_user_code[store.current_language] = code;
                 store.chatSocket.send(JSON.stringify({
                     'action': CHANGE_CODE,
-                    'code': code,
-                    'language': store.language,
+                    'code': store.current_user_code,
+                    'language': store.current_language,
                     'current_user': store.current_user
                 }));
 
@@ -176,7 +192,7 @@ print('hello python!')
         }
         async function callUser(data) {
             if(store.me !== data.username){
-                const connection = new RTCPeerConnection(configuration);
+                const connection = new RTCPeerConnection(WEB_RTC_CONF);
                 store.users[data.username] = {
                     connection: connection
                 };
@@ -193,10 +209,20 @@ print('hello python!')
                 connection.ontrack = function({ streams: [stream] }) {
                     videoElement.srcObject = stream;
                 };
-
+                //if(store.localStream){
+                //    stream.getTracks().forEach(track => connection.addTrack(track, stream));
+                //    const offer = await connection.createOffer();
+                //    await connection.setLocalDescription(new RTCSessionDescription(offer));
+                //    store.chatSocket.send(JSON.stringify({
+                //        action: MAKE_CALL,
+                //        to: data.username,
+                //        offer: offer
+                //    }));
+                //} else {
                 await navigator.getUserMedia(
-                    {video: true, audio: true},
+                    USER_MEDIA_CONF,
                     async stream => {
+                        store.localStream = stream;
                         stream.getTracks().forEach(track => connection.addTrack(track, stream));
                         const offer = await connection.createOffer();
                         await connection.setLocalDescription(new RTCSessionDescription(offer));
@@ -210,12 +236,17 @@ print('hello python!')
                         console.warn(error.message);
                     }
                 );
+                //}
 
+            } else {
+                store.code = data.code;
+                store.current_user_code = data.code;
+                setLanguage(store.language, true);
             }
         }
         async function makeAnswer(data) {
             if(store.me === data.to) {
-                const connection = new RTCPeerConnection(configuration);
+                const connection = new RTCPeerConnection(WEB_RTC_CONF);
                 store.users[data.username] = {
                     connection: connection
                 };
@@ -235,8 +266,19 @@ print('hello python!')
                 await connection.setRemoteDescription(
                     new RTCSessionDescription(data.offer)
                 );
+
+                //if(store.localStream){
+                //    stream.getTracks().forEach(track => connection.addTrack(track, stream));
+                //    const answer = await connection.createAnswer();
+                //    await connection.setLocalDescription(new RTCSessionDescription(answer));
+                //    store.chatSocket.send(JSON.stringify({
+                //        action: MAKE_ANSWER,
+                //        to: data.username,
+                //        answer: answer
+                //    }));
+                //} else {
                 await navigator.getUserMedia(
-                    {video: true, audio: true},
+                    USER_MEDIA_CONF,
                     async stream => {
                         stream.getTracks().forEach(track => connection.addTrack(track, stream));
                         const answer = await connection.createAnswer();
@@ -251,6 +293,7 @@ print('hello python!')
                         console.warn(error.message);
                     }
                 );
+                //}
 
             }
         }
@@ -265,10 +308,12 @@ print('hello python!')
         function editCode(data) {
             if(data.current_user === store.current_user){
                 const cursor = store.editor.getDoc().getCursor();
-                store.editor.getDoc().setValue(data.code);
+                store.current_user_code = data.code;
+                store.editor.getDoc().setValue(data.code[data.language]);
                 store.editor.setCursor(cursor)
                 setLanguage(data.language);
-            } else if (data.current_user === store.me) {
+            }
+            if (data.current_user === store.me) {
                 store.code = data.code;
                 store.language = data.language
             }
@@ -349,19 +394,21 @@ print('hello python!')
             store.editor.on('keyup', function (e) {
                 const code = store.editor.getDoc().getValue();
                 if(store.me === store.current_user){
-                    store.code = code
+                    store.code[store.current_language] = code;
                 }
+                store.current_user_code[store.current_language] = code;
+
                 store.chatSocket.send(JSON.stringify({
                     'action': CHANGE_CODE,
-                    'code': code,
-                    'language': store.language,
+                    'code': store.current_user_code,
+                    'language': store.current_language,
                     'current_user': store.current_user
                 }));
             });
         }
         $(document ).ready(function() {
             navigator.getUserMedia(
-                { video: true, audio: true },
+                USER_MEDIA_CONF,
                 stream => {
                     addUserElement(store.me, true).srcObject = stream;
                     store.localStream = stream;
