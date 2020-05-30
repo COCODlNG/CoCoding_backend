@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse_lazy
+from django_extensions.db.fields.json import JSONField
 from django_extensions.db.models import TimeStampedModel
 from hashid_field import HashidField
 
@@ -13,6 +14,7 @@ class MeetingMemberRelation(TimeStampedModel):
         (MEMBER_STUDENT, '학생'),
     )
     member_type = models.CharField(max_length=10, choices=MEMBER_TYPE_CHOICES, null=False)
+    code = JSONField()
 
     class Meta:
         unique_together = [['meeting', 'member'], ]
