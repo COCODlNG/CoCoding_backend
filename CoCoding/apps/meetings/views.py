@@ -32,6 +32,11 @@ class MeetingUpdateView(CheckUserMixin, UpdateView):
             self.object.save()
         return super(BaseUpdateView, self).get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super(MeetingUpdateView, self).get_context_data(**kwargs)
+        context['relations'] = MeetingMemberRelation.objects.select_related('member').filter(meeting=self.object)
+        return context
+
 
 class MeetingCreateView(CheckUserMixin, RedirectView):
 
@@ -93,6 +98,7 @@ class MeetingMemberUpdateView(View):
     pk_url_kwarg = 'pk'
     meeting = None
     user = None
+    meeting_member_relation = None
 
     def post(self, request, *args, **kwargs):
         username = request.POST.get('id_member')
@@ -100,7 +106,9 @@ class MeetingMemberUpdateView(View):
         self.user = get_object_or_404(User, username=username)
         self.meeting = get_object_or_404(Meeting, pk=kwargs['pk'])
         try:
-            MeetingMemberRelation.objects.create(meeting=self.meeting, member=self.user)
+            self.meeting_member_relation = MeetingMemberRelation.objects.create(meeting=self.meeting, member=self.user)
+            self.meeting_member_relation.member_type = MeetingMemberRelation.MEMBER_STUDENT
+            self.meeting_member_relation.save()
         except Exception:
             context = {
                 'message': 'unique',
@@ -164,3 +172,24 @@ class InvitationRedirectView(CheckUserMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         messages.add_message(self.request, messages.INFO, '이제 미팅에 참여 할 수 있습니다.')
         return reverse_lazy('meeting:list')
+
+
+class MeetingMemberTypeUpdateView(CheckUserMixin, View):
+
+    pk_url_kwarg = 'pk'
+    user = None
+    meeting = None
+    meeting_member_relation = None
+
+    def get(self, request, *args, **kwargs):
+        user_id = int(request.GET.get('user_id'))
+        self.meeting = get_object_or_404(Meeting, pk=kwargs['pk'])
+        self.user = get_object_or_404(User, pk=user_id)
+        if request.user == self.meeting.host:
+            self.meeting_member_relation = MeetingMemberRelation.objects.get(meeting=self.meeting, member=self.user)
+            if self.meeting_member_relation.member_type == 'manager':
+                self.meeting_member_relation.member_type = MeetingMemberRelation.MEMBER_STUDENT
+            else:
+                self.meeting_member_relation.member_type = MeetingMemberRelation.MEMBER_MANAGER
+            self.meeting_member_relation.save()
+            return HttpResponseRedirect(reverse_lazy('meeting:update', kwargs={'pk': kwargs['pk']}))
