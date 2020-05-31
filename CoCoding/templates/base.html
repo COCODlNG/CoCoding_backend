@@ -66,6 +66,9 @@
                                         <li><a class="active" href="{% url 'index' %}" style="font-size: 20px;">Home</a></li>
                                         <li><a href="{% url 'meeting:list' %}" style="font-size: 20px;">Meetings</a></li>
                                         <li><a href="https://github.com/COCODlNG" style="font-size: 20px;">Contact</a></li>
+                                        {% if not user.is_authenticated %}
+                                            <li><a href="{% url 'user:login' %}" style="font-size: 20px;">Login</a></li>
+                                        {% endif %}
                                     </ul>
                                 </nav>
                             </div>

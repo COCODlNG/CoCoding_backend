@@ -2,22 +2,25 @@
 {% load static %}
 
 {% block content_container %}
-        <form action="." method="post">
-            {% csrf_token %}
-            <input type="hidden" name="hash" value="{{ hash }}">
-            {% if form.errors %}
-                <ul class='form-errors'>
-                    <li style="color: red; font-weight: bold;">Please enter a correct username and password</li>
-                </ul>
-            {% endif %}
-            <p>
-                <label for="id_username">Username:</label>
-                <input type="text" name="username" autofocus required id="id_username" placeholder="Enter the username" style="border-radius: 10px;">
-            </p>
-            <p>
-                <label for="id_password">Password:</label>
-                <input type="password" name="password" autofocus required id ="id_username" placeholder="Enter the password" style="border-radius: 10px;">
-            </p>
-            <button class="genric-btn info circle">로그인</button>
-        </form>
+
+    <form action="." method="post">
+        {% csrf_token %}
+        <input type="hidden" name="hash" value="{{ hash }}">
+        {% if form.errors %}
+            <ul class='form-errors'>
+                <li style="color: red; font-weight: bold;">Please enter a correct username and password</li>
+            </ul>
+        {% endif %}
+        <p>
+            <label for="id_username">Username:</label>
+            <input type="text" name="username" autofocus required id="id_username" placeholder="Enter the username" style="border-radius: 10px;">
+        </p>
+        <p>
+            <label for="id_password">Password:</label>
+            <input type="password" name="password" autofocus required id ="id_username" placeholder="Enter the password" style="border-radius: 10px;">
+        </p>
+        <button class="genric-btn info circle" type="submit">로그인</button>
+        <button type="button" class="genric-btn info circle" onclick="location.href='{% url 'user:signup' %}'">회원이 아니신가요?</button>
+    </form>
+
 {% endblock %}
