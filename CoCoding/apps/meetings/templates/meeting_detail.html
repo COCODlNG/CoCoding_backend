@@ -184,6 +184,9 @@ print('hello python!')
             if(active){
                 $newElement.addClass('active');
             }
+            if (is_admin === 'false'){
+                is_admin = false;
+            }
             if(is_admin){
                 $newElement.addClass('admin');
             }
