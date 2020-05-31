@@ -69,6 +69,7 @@ print('hello python!')
     <script>
         store = {
             me: '{{ user.username }}',
+            is_admin: {{ relation.is_admin_template }},
             language: 'python',
             current_language: 'python',
             current_user: '{{ user.username }}',
@@ -162,7 +163,7 @@ print('hello python!')
                 "orientation": "vertical",
                 "limit": 100
             });
-
+            {% if relation.is_admin %}
             $('body').on('click', '.user-element', function() {
                 store.current_user = this.id;
                 store.chatSocket.send(JSON.stringify({
@@ -172,15 +173,19 @@ print('hello python!')
                 $('.user-element').removeClass('active');
                 $(this).addClass('active');
             });
+            {% endif %}
         }
-        function addUserElement(username, active=false) {
-            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay muted></video><p></p></div>'));
+        function addUserElement(username, is_admin=false, active=false) {
+            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay muted></video><img src="{% static 'img/crown.png' %}"><p></p></div>'));
             $newElement.attr('id', username);
             $newElement.children('p').html(username);
             store.users[username].element = $newElement;
             $('#leftPane').append($newElement);
             if(active){
                 $newElement.addClass('active');
+            }
+            if(is_admin){
+                $newElement.addClass('admin');
             }
             return $newElement.children('video')[0];
         }
@@ -205,20 +210,10 @@ print('hello python!')
                         }));
                     }
                 }
-                const videoElement = addUserElement(data.username);
+                const videoElement = addUserElement(data.username, data.is_admin);
                 connection.ontrack = function({ streams: [stream] }) {
                     videoElement.srcObject = stream;
                 };
-                //if(store.localStream){
-                //    stream.getTracks().forEach(track => connection.addTrack(track, stream));
-                //    const offer = await connection.createOffer();
-                //    await connection.setLocalDescription(new RTCSessionDescription(offer));
-                //    store.chatSocket.send(JSON.stringify({
-                //        action: MAKE_CALL,
-                //        to: data.username,
-                //        offer: offer
-                //    }));
-                //} else {
                 await navigator.getUserMedia(
                     USER_MEDIA_CONF,
                     async stream => {
@@ -229,15 +224,14 @@ print('hello python!')
                         store.chatSocket.send(JSON.stringify({
                             action: MAKE_CALL,
                             to: data.username,
-                            offer: offer
+                            offer: offer,
+                            is_admin: store.is_admin,
                         }));
                     },
                     error => {
                         console.warn(error.message);
                     }
                 );
-                //}
-
             } else {
                 store.code = data.code;
                 store.current_user_code = data.code;
@@ -259,7 +253,7 @@ print('hello python!')
                         }));
                     }
                 }
-                const videoElement = addUserElement(data.username);
+                const videoElement = addUserElement(data.username, data.is_admin);
                 connection.ontrack = function({ streams: [stream] }) {
                     videoElement.srcObject = stream;
                 };
@@ -267,16 +261,6 @@ print('hello python!')
                     new RTCSessionDescription(data.offer)
                 );
 
-                //if(store.localStream){
-                //    stream.getTracks().forEach(track => connection.addTrack(track, stream));
-                //    const answer = await connection.createAnswer();
-                //    await connection.setLocalDescription(new RTCSessionDescription(answer));
-                //    store.chatSocket.send(JSON.stringify({
-                //        action: MAKE_ANSWER,
-                //        to: data.username,
-                //        answer: answer
-                //    }));
-                //} else {
                 await navigator.getUserMedia(
                     USER_MEDIA_CONF,
                     async stream => {
@@ -293,8 +277,6 @@ print('hello python!')
                         console.warn(error.message);
                     }
                 );
-                //}
-
             }
         }
         async function setAnswer(data) {
@@ -369,7 +351,7 @@ print('hello python!')
         }
         function setSocket(){
             store.chatSocket = new WebSocket(
-                'wss://'
+                'ws://'
                 + window.location.host
                 + '/ws/chat/'
                 + {{object.id}}
@@ -410,7 +392,7 @@ print('hello python!')
             navigator.getUserMedia(
                 USER_MEDIA_CONF,
                 stream => {
-                    addUserElement(store.me, true).srcObject = stream;
+                    addUserElement(store.me, store.is_admin, true).srcObject = stream;
                     store.localStream = stream;
                 },
                 error => {
