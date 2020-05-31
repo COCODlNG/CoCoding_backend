@@ -270,7 +270,8 @@ print('hello python!')
                         store.chatSocket.send(JSON.stringify({
                             action: MAKE_ANSWER,
                             to: data.username,
-                            answer: answer
+                            answer: answer,
+                            is_admin: store.is_admin,
                         }));
                     },
                     error => {
