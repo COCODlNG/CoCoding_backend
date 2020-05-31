@@ -47,12 +47,17 @@ class MeetingDetailView(CheckUserMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-
-        if not MeetingMemberRelation.objects.filter(meeting=self.object, member=self.request.user).exists():
+        self.relation = MeetingMemberRelation.objects.filter(meeting=self.object, member=self.request.user).first()
+        if not self.relation:
             return HttpResponseForbidden()
 
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super(MeetingDetailView, self).get_context_data(**kwargs)
+        context['relation'] = self.relation
+        return context
 
 
 class MeetingStartView(CheckUserMixin, RedirectView):
