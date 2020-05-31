@@ -28,6 +28,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'add_user',
                 'username': self.scope['user'].username,
+                'is_admin': self.relation.is_admin_template(),
             }
         )
 
@@ -86,7 +87,7 @@ void main(){
             'action': 'add_user',
             'username': event['username'],
             'code': self.relation.code,
-            'is_admin': self.relation.is_admin_template(),
+            'is_admin': event['is_admin'],
         }))
 
     async def discard_user(self, event):
