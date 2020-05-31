@@ -62,7 +62,7 @@ body p {
     outline: none !important;
 }
 .user-element{
-    margin-bottom: -35px;
+    position: relative;
 }
 .user-element.active video{
     border: solid 4px lightgreen;
@@ -71,10 +71,28 @@ body p {
     width: 100%;
 }
 .user-element p {
+    margin: 0;
     display: inline;
-    position: relative;
+    position: absolute;
     background-color: rgba(0,0,0,0.8);
     padding: 10px;
-    top: -42px;
+    top: 0;
+    left: 0;
     color: white;
+}
+.user-element img {
+    position: absolute;
+    top: -20px;
+    right: -10px;
+    height: 100px;
+    width: 100px;
+    visibility: hidden;
+}
+.user-element.admin img {
+    position: absolute;
+    top: -20px;
+    right: -10px;
+    height: 100px;
+    width: 100px;
+    visibility: visible;
 }
