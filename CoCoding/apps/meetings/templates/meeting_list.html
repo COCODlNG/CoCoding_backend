@@ -20,7 +20,6 @@
 {% endblock %}
 
 {% block content_container %}
-
     <div>
         {% for meeting in object_list %}
             <div class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">
@@ -30,7 +29,7 @@
                             <a class="d-inline-block" href="{{ meeting.get_start_url }}">
                                 <h2>{{ meeting.title }}</h2>
                             </a>
-                            <span>{{ meeting.host }}교수님</span>
+                            <span>{{ meeting.host }} 교수님</span>
                             <p>{{ meeting.description }}</p>
                             <ul class="blog-info-link">
                                 {% if meeting.host == user %}
@@ -41,7 +40,7 @@
                                     {% if meeting.is_ongoing %}
                                         <button onclick="location.href='{{ meeting.get_detail_url }}'" class="genric-btn info circle">미팅 참가</button>
                                     {% else %}
-                                        <a href="" class="genric-btn info circle">미팅 참가</a>
+                                        <button onclick="javascript: alert('지금은 참가할 수 없습니다.')" class="genric-btn info circle">미팅 참가</button>
                                     {% endif %}
                                 {% endif %}
                             </ul>
