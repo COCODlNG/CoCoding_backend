@@ -176,7 +176,7 @@ print('hello python!')
             {% endif %}
         }
         function addUserElement(username, is_admin=false, active=false) {
-            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay muted></video><img src="{% static 'img/crown.png' %}"><p></p></div>'));
+            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay muted></video><img src="{% static 'img/Simple_crown_icon.svg' %}"><p></p></div>'));
             $newElement.attr('id', username);
             $newElement.children('p').html(username);
             store.users[username].element = $newElement;
@@ -372,7 +372,7 @@ print('hello python!')
         function setEditor(){
             store.editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
                 mode: "python",
-                theme: "darcula",
+               // theme: "darcula",
                 styleActiveLine: true,
                 lineNumbers: true,
                 lineWrapping: true
