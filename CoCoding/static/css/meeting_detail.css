@@ -82,17 +82,13 @@ body p {
 }
 .user-element img {
     position: absolute;
-    top: -20px;
-    right: -10px;
-    height: 100px;
-    width: 100px;
+    top: 0;
+    right: 10px;
+    height: 50px;
+    width: 50px;
     visibility: hidden;
 }
 .user-element.admin img {
     position: absolute;
-    top: -20px;
-    right: -10px;
-    height: 100px;
-    width: 100px;
     visibility: visible;
 }
