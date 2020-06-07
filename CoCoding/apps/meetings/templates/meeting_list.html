@@ -1,5 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block extra_css %}
+    <style>
+        .genric-btn.primary {
+            color: #fff;
+            background: orange;
+            border: 1px solid transparent;
+        }
+        .genric-btn.primary:hover {
+            color: orange;
+            border: 1px solid orange;
+            background: #fff;
+        }
+    </style>
+{% endblock %}
 {% block breadcam %}
     <!-- bradcam_area  -->
     <div class="bradcam_area bradcam_bg_1">
@@ -18,30 +32,43 @@
     </div>
     <!-- /bradcam_area  -->
 {% endblock %}
-
 {% block content_container %}
 
-    <div>
+    <div class="row">
         {% for meeting in object_list %}
-            <div class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">
-                <div class="col-lg-12 mb-5 mb-lg-0">
+            <div class="col-md-6">
+                <div class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" style="visibility: visible; animation-duration: 1s; animation-delay: 0.1s;">
+
                     <article class="blog_item">
-                        <div class="blog_details">
-                            <a class="d-inline-block" href="{{ meeting.get_start_url }}">
-                                <h2>{{ meeting.title }}</h2>
-                            </a>
-                            <span>{{ meeting.host }}교수님</span>
-                            <p>{{ meeting.description }}</p>
+                        <div class="blog_details" style="border: 1px; solid-color: #1b2426">
+                            <div style="display: flex;">
+                                <a class="d-inline-block" href="{{ meeting.get_start_url }}">
+                                    <h2>{{ meeting.title }}&nbsp;&nbsp;</h2>
+                                </a>
+                                {#                                <span style="margin-left: auto;">{{ meeting.host }}교수님</span>#}
+                                <span>{{ meeting.host }}교수님</span>
+                            </div>
+                            <p style="justify-content: center">{{ meeting.description }}</p>
                             <ul class="blog-info-link">
                                 {% if meeting.host == user %}
-                                    <button onclick="location.href='{{ meeting.get_update_url }}'" class="genric-btn info circle">미팅 관리</button>
-                                    <button onclick="location.href='{{ meeting.get_start_url }}'" class="genric-btn info circle">미팅 시작</button>
-                                    <button onclick="javascript: if(confirm('삭제하시겠습니까??')){location.href='{% url 'meeting:delete' meeting.pk %}'}" class="genric-btn info circle">미팅 삭제</button>
+                                    <div style="display: flex">
+                                        <ul class="blog-info-link" style="padding-top: 20px;">
+                                            <li><a href="{% url 'meeting:update' meeting.pk %}"><i class="fa fa-user"></i>미팅 관리</a></li>
+                                            <li><a href="javascript: if(confirm('삭제하시겠습니까??')){location.href='{% url 'meeting:delete' meeting.pk %}'}"><i class="fa fa-comments"></i>미팅 삭제</a></li>
+                                        </ul>
+                                        <button onclick="location.href='{{ meeting.get_start_url }}'" class="genric-btn primary circle" style="margin-left: auto;" >미팅 시작</button>
+                                    </div>
                                 {% else %}
                                     {% if meeting.is_ongoing %}
-                                        <button onclick="location.href='{{ meeting.get_detail_url }}'" class="genric-btn info circle">미팅 참가</button>
+                                        <div style="display: flex">
+                                            <input type="hidden" value="#">
+                                            <button onclick="location.href='{{ meeting.get_detail_url }}'" class="genric-btn primary circle" style="justify-content: right;">미팅 참가</button>
+                                        </div>
                                     {% else %}
-                                        <a href="" class="genric-btn info circle">미팅 참가</a>
+                                        <div style="display: flex">
+                                            <input type="hidden" value="#">
+                                            <a href="" class="genric-btn primary circle" style="margin-left: auto">미팅 참가</a>
+                                        </div>
                                     {% endif %}
                                 {% endif %}
                             </ul>
