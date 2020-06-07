@@ -28,6 +28,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'add_user',
                 'username': self.scope['user'].username,
+                'is_admin': self.relation.is_admin_template(),
             }
         )
 
@@ -49,8 +50,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         text_data = json.loads(text_data)
         text_data['username'] = self.scope['user'].username
-        if text_data['username'] == text_data['current_user']:
-            self.relation.code = text_data['code']
+        if text_data['action'] == 'edit_code':
+            if text_data['username'] == text_data['current_user']:
+                self.relation.code = text_data['code']
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -85,6 +87,7 @@ void main(){
             'action': 'add_user',
             'username': event['username'],
             'code': self.relation.code,
+            'is_admin': event['is_admin'],
         }))
 
     async def discard_user(self, event):
