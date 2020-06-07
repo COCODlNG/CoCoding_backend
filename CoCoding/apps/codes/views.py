@@ -21,7 +21,7 @@ def run_code(request, *args, **kwargs):
     if language == 'python':
         code_dict['main.py'] = code
     elif language == 'java':
-        code_dict['main.java'] = code
+        code_dict['Main.java'] = code
     elif language == 'c':
         code_dict['main.c'] = code
     try:
