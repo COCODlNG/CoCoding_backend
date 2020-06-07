@@ -94,7 +94,13 @@
     <div class="msg-wrap" style="height: 100%; overflow-y: scroll; padding-left: 20px; ">
         {#메세지부분#}
     </div>
-    <div class="card-footer" style="bottom: 0">
+    <div class="card-footer" style="bottom: 0; color: black;">
+        <div>
+            <label for="to">To:</label>
+            <select name="toUser" id="toUser" onclick="selectUser();" style="border: none; background: transparent;">
+                <option value="everyone">everyone</option>
+            </select>
+        </div>
         <div class="input-group">
             <input type="text" class="form-control type_msg" placeholder="Type your message..." style="border-top-left-radius: 20px; border-bottom-left-radius: 20px"/>
             <div class="input-group-append">
@@ -116,7 +122,15 @@
     function openChat() {
         document.getElementById("mySidebar").style.width = "450px";
     }
-
+    function selectUser() {
+        $select = $('#toUser')
+        $select.empty();
+        const users = Object.keys(store.users);
+        $select.append(`<option value="${'everyone'}">${'everyone'}</option>`);
+        for (var i = 0; i < users.length; i++){
+            $select.append(`<option value="${users[i]}">${users[i]}</option>`);
+        }
+    }
     function closeChat() {
         document.getElementById("mySidebar").style.width = "0";
         messageCount = 0;
@@ -124,9 +138,11 @@
     }
 
     function sendMessage(message){
+        const toUser = $('#toUser').val();
         store.chatSocket.send(JSON.stringify({
             'action': CHAT_MESSAGE,
-            'message': message
+            'message': message,
+            'to': toUser
         }));
     }
     function appendHtml(el, str) {
@@ -141,23 +157,44 @@
     function recvMessage(e){
         const data = JSON.parse(e.data);
         let html = `<div class="media msg">
+            <a class="pull-left" href="#">
+                <img class="media-object" data-src="holder.js/64x64" alt="64x64" style="width: 32px; height: 32px;" src="{% static 'img/cocoding_logo.png'%}">
+            </a>
+            <div class="media-body" style="display: flex; flex-direction: row-reverse; justify-content: space-between;">
+                <small class="pull-right time" style="color: #0b0b0b; padding: 20px;"><i class="fa fa-clock-o"></i> ${(new Date).hhmm()}</small>
+                <div style="padding-left: 10px;">
+                    <h5 class="media-heading" style="margin: 0">${data.username}</h5>
+                    <small class="col-lg-10" style="color: #0b0b0b; padding: 0; word-break: break-all;">${data.message}</small>
+                </div>
+            </div>
+        </div>`;
+        if (data.to === 'everyone'){
+
+            appendHtml(document.querySelector('.msg-wrap'), html)
+            messageCount += 1;
+
+            if(messageCount >= 1){
+                $('.floating-btn').html("<span><i class='fa fa-commenting-o' aria-hidden='true'></i></span><span class='badge'>" +messageCount +"</span>");
+            }
+        } else if (data.to === store.me || data.username === store.me){
+            let html = `<div class="media msg">
                 <a class="pull-left" href="#">
                     <img class="media-object" data-src="holder.js/64x64" alt="64x64" style="width: 32px; height: 32px;" src="{% static 'img/cocoding_logo.png'%}">
                 </a>
                 <div class="media-body" style="display: flex; flex-direction: row-reverse; justify-content: space-between;">
                     <small class="pull-right time" style="color: #0b0b0b; padding: 20px;"><i class="fa fa-clock-o"></i> ${(new Date).hhmm()}</small>
                     <div style="padding-left: 10px;">
-                        <h5 class="media-heading" style="margin: 0">${data.username}</h5>
+                        <h5 class="media-heading" style="margin: 0">${data.username} <span style="color:orange;"> (private)</span></h5>
                         <small class="col-lg-10" style="color: #0b0b0b; padding: 0; word-break: break-all;">${data.message}</small>
                     </div>
                 </div>
             </div>`;
+            appendHtml(document.querySelector('.msg-wrap'), html)
+            messageCount += 1;
 
-        appendHtml(document.querySelector('.msg-wrap'), html)
-        messageCount += 1;
-
-        if(messageCount >= 1){
-            $('.floating-btn').html("<span><i class='fa fa-commenting-o' aria-hidden='true'></i></span><span class='badge'>" +messageCount +"</span>");
+            if(messageCount >= 1){
+                $('.floating-btn').html("<span><i class='fa fa-commenting-o' aria-hidden='true'></i></span><span class='badge'>" +messageCount +"</span>");
+            }
         }
 
     }
