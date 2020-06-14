@@ -111,6 +111,7 @@ print('hello python!')
         }
         function setListeners(){
             $('#runBtn').click(function () {
+                alert('코드를 실행합니다.');
                 $.ajax({
                     url: "{% url 'code:run' %}",
                     type: "POST",
