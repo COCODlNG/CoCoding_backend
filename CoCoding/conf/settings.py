@@ -86,10 +86,14 @@ WSGI_APPLICATION = 'conf.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+# local settings
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'cocoding',
+        'USER': 'root',
+        'PASSWORD': '1',
+        'HOST': '127.0.0.1',
     }
 }
 
@@ -150,6 +154,7 @@ REST_FRAMEWORK = {
 }
 
 # Django Channels
+# local settings
 ASGI_APPLICATION = 'conf.routing.application'
 CHANNEL_LAYERS = {
     'default': {
@@ -162,3 +167,5 @@ CHANNEL_LAYERS = {
 
 HASHID_FIELD_SALT = "a long and secure salt value that is not the same as SECRET_KEY"
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+
+CELERY_BROKER_URL = 'amqp://kidsnote:kidsnote@127.0.0.1:5672/default'
