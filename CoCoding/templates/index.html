@@ -3,6 +3,31 @@
 {% block title %}CoCoding{% endblock %}
 {% block breadcam %}{% endblock %}
 {% block content %}
+    {% if messages %}
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">알림</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="genric-btn info circle" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- slider_area_start -->
     <div class="slider_area">
         <div class="single_slider  d-flex align-items-center slider_bg_1">
@@ -11,7 +36,7 @@
                     <div class="col-xl-7 col-md-6">
                         <div class="slider_text ">
                             <h3 class="wow fadeInDown" data-wow-duration="1s" data-wow-delay=".1s" >CoCoding<br>
-                                </h3>
+                            </h3>
                             <p class="wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".1s">Let's Start CoCoding with Capstone Project~</p>
                             {% if not user.is_authenticated %}
                                 <div class="video_service_btn wow fadeInLeft" data-wow-duration="1s" data-wow-delay=".1s">
