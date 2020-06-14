@@ -175,8 +175,8 @@ print('hello python!')
             });
             {% endif %}
         }
-        function addUserElement(username, is_admin=false, active=false) {
-            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay muted></video><img src="{% static 'img/Simple_crown_icon.svg' %}"><p></p></div>'));
+        function addUserElement(username, is_admin=false, active=false, is_me=false) {
+            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay playsinline muted></video><img src="{% static 'img/Simple_crown_icon.svg' %}"><p></p></div>'));
             $newElement.attr('id', username);
             $newElement.children('p').html(username);
             store.users[username].element = $newElement;
@@ -186,6 +186,9 @@ print('hello python!')
             }
             if (is_admin === 'false'){
                 is_admin = false;
+            }
+            if (!is_me) {
+                $newElement.children('video').removeAttr('muted');
             }
             if(is_admin){
                 $newElement.addClass('admin');
@@ -399,7 +402,7 @@ print('hello python!')
             navigator.getUserMedia(
                 USER_MEDIA_CONF,
                 stream => {
-                    addUserElement(store.me, store.is_admin, true).srcObject = stream;
+                    addUserElement(store.me, store.is_admin, true, true).srcObject = stream;
                     store.localStream = stream;
                 },
                 error => {
