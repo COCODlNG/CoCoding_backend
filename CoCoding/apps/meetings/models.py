@@ -7,7 +7,7 @@ from hashid_field import HashidField
 
 class MeetingMemberRelation(TimeStampedModel):
     meeting = models.ForeignKey('meetings.Meeting', on_delete=models.CASCADE, null=False)
-    member = models.ForeignKey('users.User', on_delete=models.CASCADE, null=False, default='student')
+    member = models.ForeignKey('users.User', on_delete=models.CASCADE, null=False)
     MEMBER_MANAGER, MEMBER_STUDENT = 'manager', 'student'
     MEMBER_TYPE_CHOICES = (
         (MEMBER_MANAGER, '관리자'),
