@@ -171,7 +171,7 @@ iframe {
   /*background-position: center;*/
   /*background-size: cover;*/
   background-repeat: repeat;
-  background-position: 50px 50px;
+  background-position-x: 140px;
   background-image: url('../img/login_bg.png');
   background-size: 280px;
 
