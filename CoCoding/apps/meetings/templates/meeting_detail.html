@@ -165,15 +165,15 @@ print('hello python!')
                 "limit": 100
             });
             {% if relation.is_admin %}
-            $('body').on('click', '.user-element', function() {
-                store.current_user = this.id;
-                store.chatSocket.send(JSON.stringify({
-                    action: GET_CODE,
-                    current_user: store.current_user
-                }));
-                $('.user-element').removeClass('active');
-                $(this).addClass('active');
-            });
+                $('body').on('click', '.user-element', function() {
+                    store.current_user = this.id;
+                    store.chatSocket.send(JSON.stringify({
+                        action: GET_CODE,
+                        current_user: store.current_user
+                    }));
+                    $('.user-element').removeClass('active');
+                    $(this).addClass('active');
+                });
             {% endif %}
         }
         function addUserElement(username, is_admin=false, active=false, is_me=false) {
@@ -193,6 +193,13 @@ print('hello python!')
             }
             if(is_admin){
                 $newElement.addClass('admin');
+            }
+            $select = $('#toUser')
+            $select.empty();
+            const users = Object.keys(store.users);
+            $select.append(`<option value="${'everyone'}">${'everyone'}</option>`);
+            for (var i = 0; i < users.length; i++){
+                $select.append(`<option value="${users[i]}">${users[i]}</option>`);
             }
             return $newElement.children('video')[0];
         }
@@ -318,6 +325,13 @@ print('hello python!')
             store.users[data.username].connection.close();
             store.users[data.username].element.remove();
             delete store.users[data.username];
+            $select = $('#toUser')
+            $select.empty();
+            const users = Object.keys(store.users);
+            $select.append(`<option value="${'everyone'}">${'everyone'}</option>`);
+            for (var i = 0; i < users.length; i++){
+                $select.append(`<option value="${users[i]}">${users[i]}</option>`);
+            }
         }
         function sendCode(data) {
             if(data.current_user === store.me){
