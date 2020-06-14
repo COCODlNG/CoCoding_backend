@@ -102,7 +102,7 @@ def execute_code(code_dict, input, language_type, pk, timeout=2):
     if language_type == PYTHON:
         file_name = 'main.py'
         full_path = code_dir + file_name
-        proc = Popen(['python', full_path], stdout=PIPE, stderr=PIPE)
+        proc = Popen(['python', full_path], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         out, err = proc.communicate(input=input.encode(), timeout=2)
         if err:
             end_msg = RUNTIME_ERROR
