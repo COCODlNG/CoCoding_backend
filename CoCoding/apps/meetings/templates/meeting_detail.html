@@ -176,7 +176,7 @@ print('hello python!')
             {% endif %}
         }
         function addUserElement(username, is_admin=false, active=false, is_me=false) {
-            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><video autoplay playsinline muted></video><img src="{% static 'img/Simple_crown_icon.svg' %}"><p></p></div>'));
+            const $newElement = $($.parseHTML('<div class="user-element" id="myElement"><audio autoplay controls style="display: none;"></audio><video autoplay playsinline muted></video><img src="{% static 'img/Simple_crown_icon.svg' %}"><p></p></div>'));
             $newElement.attr('id', username);
             $newElement.children('p').html(username);
             store.users[username].element = $newElement;
@@ -219,6 +219,7 @@ print('hello python!')
                 const videoElement = addUserElement(data.username, data.is_admin);
                 connection.ontrack = function({ streams: [stream] }) {
                     videoElement.srcObject = stream;
+                    $('#' + data.username).children('audio')[0].srcObject = stream;
                 };
                 await navigator.getUserMedia(
                     USER_MEDIA_CONF,
@@ -262,6 +263,7 @@ print('hello python!')
                 const videoElement = addUserElement(data.username, data.is_admin);
                 connection.ontrack = function({ streams: [stream] }) {
                     videoElement.srcObject = stream;
+                    $('#' + data.username).children('audio')[0].srcObject = stream;
                 };
                 await connection.setRemoteDescription(
                     new RTCSessionDescription(data.offer)
