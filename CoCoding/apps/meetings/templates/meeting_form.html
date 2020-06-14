@@ -103,9 +103,9 @@
                                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                             <a class="delete dropdown-item" data-pk="{{ relation.member.id }}">삭제</a>
                                             {% if relation.member_type == 'student' %}
-                                                <a class="manager dropdown-item" href="javascript: memberTypeManager()" data-type="manager" data-pk="{{ relation.member.id }}">관리자로 지정</a>
+                                                <a class="manager dropdown-item" href="javascript: memberTypeManager()" data-type="manager" data-pk="{{ relation.member.id }}" style="color: black">관리자로 지정</a>
                                             {% else %}
-                                                <a class="student dropdown-item" href="javascript: memberTypeStudent()" data-type="student" data-pk="{{ relation.member.id }}">권한 회수</a>
+                                                <a class="student dropdown-item" href="javascript: memberTypeStudent()" data-type="student" data-pk="{{ relation.member.id }}" style="color: black">권한 회수</a>
                                             {% endif %}
                                         </div>
                                     </div>
