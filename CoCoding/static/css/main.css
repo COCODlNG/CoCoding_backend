@@ -148,13 +148,17 @@ iframe {
   align-items: center;
   padding: 15px;
   
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;;
+  /*background-position: center;*/
+  /*background-size: cover;*/
+  background-repeat: repeat;
+  background-image: url('../img/login_bg.png');
+  background-size: 280px;
 }
 
 
 .wrap-login100 {
+  /*padding-right: 35px;*/
+  /*padding-left: 35px;*/
   width: 390px;
   background: #fff;
   border-radius: 10px;
