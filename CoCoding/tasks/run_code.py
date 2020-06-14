@@ -89,7 +89,7 @@ def construct_code_tree(code_dict, language_type, code_dir):
             f.close()
 
 
-def execute_code(code_dict, input, language_type, pk):
+def execute_code(code_dict, input, language_type, pk, timeout=2):
     C, JAVA, PYTHON = 'c', 'java', 'python'
     EXECUTE_COMPLETE, COMPILE_ERROR, RUNTIME_ERROR = 0, 1, 2
     end_msg = -1
@@ -102,8 +102,8 @@ def execute_code(code_dict, input, language_type, pk):
     if language_type == PYTHON:
         file_name = 'main.py'
         full_path = code_dir + file_name
-        proc = Popen(['python', full_path], stdout=PIPE, stderr=PIPE)
-        out, err = proc.communicate(input= input.encode())
+        proc = Popen(['python', full_path], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        out, err = proc.communicate(input=input.encode(), timeout=2)
         if err:
             end_msg = RUNTIME_ERROR
         else:
@@ -115,7 +115,7 @@ def execute_code(code_dict, input, language_type, pk):
         full_path = code_dir + file_name
         proc = Popen(['javac', '-d', code_dir, '-sourcepath', code_dir ,full_path], stdout=PIPE,
                      stdin=PIPE, stderr=PIPE)
-        out, err = proc.communicate()
+        out, err = proc.communicate(timeout=timeout)
         if err:
             end_msg = COMPILE_ERROR
             output = out.decode('utf-8')
@@ -124,7 +124,7 @@ def execute_code(code_dict, input, language_type, pk):
             full_path = code_dir + ':' + 'Main'
             proc = Popen(['java', '-classpath', code_dir, 'Main'], stdout=PIPE,
                          stdin=PIPE, stderr=PIPE)
-            out, err = proc.communicate(input= input.encode())
+            out, err = proc.communicate(input=input.encode(), timeout=timeout)
             if err:
                 end_msg = RUNTIME_ERROR
             else:
@@ -138,7 +138,7 @@ def execute_code(code_dict, input, language_type, pk):
         print(execute_file_name)
         proc = Popen(['gcc', full_path, '-o', execute_file_name], stdout=PIPE,
                                 stdin=PIPE, stderr=PIPE)
-        out, err = proc.communicate()
+        out, err = proc.communicate(timeout=timeout)
         if err:
             end_msg = COMPILE_ERROR
             output = out.decode('utf-8')
@@ -146,7 +146,7 @@ def execute_code(code_dict, input, language_type, pk):
         else:
             proc = Popen([execute_file_name], stdout=PIPE,
                          stdin=PIPE, stderr=PIPE)
-            out, err = proc.communicate(input = input.encode())
+            out, err = proc.communicate(input = input.encode(), timeout=timeout)
             if err:
                 end_msg = RUNTIME_ERROR
             else:
@@ -156,7 +156,6 @@ def execute_code(code_dict, input, language_type, pk):
 
     shutil.rmtree(code_dir_name)
     return end_msg, output, error
-
 
 
 if __name__ == '__main__':

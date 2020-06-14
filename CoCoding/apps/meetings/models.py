@@ -7,17 +7,23 @@ from hashid_field import HashidField
 
 class MeetingMemberRelation(TimeStampedModel):
     meeting = models.ForeignKey('meetings.Meeting', on_delete=models.CASCADE, null=False)
-    member = models.ForeignKey('users.User', on_delete=models.CASCADE, null=False)
+    member = models.ForeignKey('users.User', on_delete=models.CASCADE, null=False, default='student')
     MEMBER_MANAGER, MEMBER_STUDENT = 'manager', 'student'
     MEMBER_TYPE_CHOICES = (
         (MEMBER_MANAGER, '관리자'),
         (MEMBER_STUDENT, '학생'),
     )
-    member_type = models.CharField(max_length=10, choices=MEMBER_TYPE_CHOICES, null=False)
+    member_type = models.CharField(max_length=10, choices=MEMBER_TYPE_CHOICES, null=False, default=MEMBER_STUDENT)
     code = JSONField()
 
     class Meta:
         unique_together = [['meeting', 'member'], ]
+
+    def is_admin(self):
+        return self.member_type == self.MEMBER_MANAGER
+
+    def is_admin_template(self):
+        return 'true' if self.is_admin() else 'false'
 
 
 class Meeting(TimeStampedModel):
