@@ -37,6 +37,6 @@ def run_code(request, *args, **kwargs):
         is_error = True
     return JsonResponse({
         'is_error': is_error,
-        'std_out': std_out,
-        'err_out': err_out,
+        'std_out': std_out.replace('/home/ubuntu/CoCoding_backend/CoCoding/tasks/task_code/', ''),
+        'err_out': err_out.replace('/home/ubuntu/CoCoding_backend/CoCoding/tasks/task_code/', ''),
     })
