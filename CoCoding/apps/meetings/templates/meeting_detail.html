@@ -292,6 +292,9 @@ print('hello python!')
             }
         }
         function editCode(data) {
+            if(data.username === store.me){
+                return
+            }
             if(data.current_user === store.current_user){
                 const cursor = store.editor.getDoc().getCursor();
                 store.current_user_code = data.code;
