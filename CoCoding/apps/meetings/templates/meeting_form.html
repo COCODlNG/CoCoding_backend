@@ -87,18 +87,18 @@
 
                 <div class="section-top-border" style="margin-top: 15px;">
                     <div class="progress-table-wrap">
-                        <div class="progress-table">
+                        <div class="progress-table" style="min-width: 0;">
                             <div class="table-head">
-                                <div class="serial">#</div>
-                                <div class="visit" type="text">Name</div>
-                                <div class="visit" type="text">Member type</div>
+                                <div class="serial col-lg-1 col-md-2">#</div>
+                                <div class="visit col-lg-4 col-md-6" type="text">Name</div>
+                                <div class="country col-lg-4 col-md-6" type="text" style="width: 0;">Member type</div>
                             </div>
                             {% for relation in relations %}
                                 <div class="table-row">
-                                    <div class="serial" type="text" style="width: 11.83%; padding-left: 30px;">{{ relation.member.id }}</div>
-                                    <div class="country" type="text" style="width: 17.74%;">{{ relation.member.username }}</div>
-                                    <div class="visit" style="width: 19.74%;">{{ relation.member_type }}</div>
-                                    <div class="dropdown">
+                                    <div class="serial col-lg-1 col-md-2" type="text" style="width: 11.83%; padding-left: 30px;">{{ relation.member.id }}</div>
+                                    <div class="visit col-lg-4 col-md-6" type="text" style="width: 17.74%;">{{ relation.member.username }}</div>
+                                    <div class="country col-lg-3 col-md-4" style="width: 19.74%;">{{ relation.member_type }}</div>
+                                    <div class="dropdown col-lg-2 col-md-3">
                                         <i class="fa fa-ellipsis-v" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-hidden="true" style="text-align: center; width: 50px;"></i>
                                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                             <a class="delete dropdown-item" data-pk="{{ relation.member.id }}">삭제</a>
