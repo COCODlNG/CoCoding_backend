@@ -35,4 +35,5 @@ class LogoutView(RedirectView):
 class UserRegisterView(CreateView):
     template_name = 'register.html'
     form_class = UserCreationForm
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('user:login')
+
