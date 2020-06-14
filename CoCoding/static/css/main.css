@@ -153,6 +153,28 @@ iframe {
   background-repeat: repeat;
   background-image: url('../img/login_bg.png');
   background-size: 280px;
+
+}
+.container-login100-2 {
+  width: 100%;
+  min-height: 100vh;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+
+  /*background-position: center;*/
+  /*background-size: cover;*/
+  background-repeat: repeat;
+  background-position: 50px 50px;
+  background-image: url('../img/login_bg.png');
+  background-size: 280px;
+
 }
 
 
