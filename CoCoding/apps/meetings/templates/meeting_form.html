@@ -29,6 +29,7 @@
 {% endblock %}
 {% block content_container %}
     <div class="row">
+        <div class="row col-sm-12">
         <div class="col-sm-6">
             <h1 class="contact-title">미팅에 멤버를 추가해주세요!</h1>
         </div>
@@ -60,7 +61,8 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        </div>
+        <div class="row col-sm-6">
             <div class="col-sm-6">
                 <form class="form-contact contact_form" action="." method="post">
                     {% csrf_token %}
