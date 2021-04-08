@@ -14,7 +14,7 @@ channels-redis==2.4.2
 constantly==15.1.0
 cryptography==2.9.2
 daphne==2.5.0
-Django==2.2.10
+Django==2.2.20
 django-celery==3.3.1
 django-extensions==2.2.9
 django-hashid-field==3.1.1
